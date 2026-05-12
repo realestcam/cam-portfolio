@@ -50,16 +50,10 @@ export default function HomePage() {
   const [hovered, setHovered] = useState<string | null>(null);
   const [devMode, setDevMode] = useState(false);
   const [devCoords, setDevCoords] = useState<{ x: number; y: number } | null>(null);
-  const [introPhase, setIntroPhase] = useState<IntroPhase>(() => {
-    if (typeof window === "undefined") return "intro";
-    const params = new URLSearchParams(window.location.search);
-    const force = params.get("intro") === "true";
-    const skip = params.get("skipIntro") === "true";
-    const seen = window.localStorage.getItem("cb_hasSeenIntro") === "1";
-    if (skip) return "normal";
-    if (force) return "intro";
-    return seen ? "normal" : "intro";
-  });
+  // Always start in "intro" — the pre-hydration script in layout.tsx adds
+  // `cb-skip-intro` to <html> for repeat visitors, and CSS hides the overlay.
+  // No SSR/client hydration mismatch this way.
+  const [introPhase, setIntroPhase] = useState<IntroPhase>("intro");
   const [roomSrc, setRoomSrc] = useState("/Clean.webp");
   const containerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);

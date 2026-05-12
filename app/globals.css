@@ -98,6 +98,9 @@ body {
 .mobile-top-bar { display: none; }
 .mobile-spacer { display: none; }
 
+/* Hide intro overlay if user has already seen it (set pre-hydration by Script in layout) */
+html.cb-skip-intro .cb-opening-overlay { display: none !important; }
+
 @media (max-width: 768px) {
   body { height: auto; overflow-y: auto; }
   .mobile-spacer { display: block !important; height: 44px; }

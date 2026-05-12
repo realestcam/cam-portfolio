@@ -48,6 +48,7 @@ export function OpeningExperience({
 
   return (
     <div
+      className="cb-opening-overlay"
       style={{
         position: "fixed",
         inset: 0,

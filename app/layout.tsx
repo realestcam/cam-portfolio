@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 import { MobileTopBar } from "./components/MobileTopBar";
 
@@ -19,6 +20,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
+        <Script id="cb-intro-check" strategy="beforeInteractive">
+          {`(function(){try{var p=new URLSearchParams(location.search);var seen=localStorage.getItem('cb_hasSeenIntro')==='1';var force=p.get('intro')==='true';var skip=p.get('skipIntro')==='true';if(skip||(!force&&seen)){document.documentElement.classList.add('cb-skip-intro');}}catch(e){}})();`}
+        </Script>
         <MobileTopBar />
         <div className="mobile-spacer" aria-hidden />
         {children}
