@@ -1,0 +1,132 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { height: 100%; }
+
+body {
+  height: 100%;
+  background: #0d0b08;
+  color: rgba(255,255,255,0.85);
+  -webkit-font-smoothing: antialiased;
+}
+
+@keyframes roomTilt {
+  0%   { transform: perspective(1400px) rotateX(0deg)    rotateY(0deg); }
+  25%  { transform: perspective(1400px) rotateX(0.4deg)  rotateY(-0.5deg); }
+  50%  { transform: perspective(1400px) rotateX(-0.3deg) rotateY(0.4deg); }
+  75%  { transform: perspective(1400px) rotateX(0.3deg)  rotateY(0.3deg); }
+  100% { transform: perspective(1400px) rotateX(0deg)    rotateY(0deg); }
+}
+
+@keyframes dotPulse {
+  0%, 8%   { opacity: 0; box-shadow: 0 0 0 0  rgba(247,37,133,0); }
+  16%      { opacity: 1; box-shadow: 0 0 0 0  rgba(247,37,133,0.65); }
+  55%      { opacity: 1; box-shadow: 0 0 0 26px rgba(247,37,133,0); }
+  88%      { opacity: 1; box-shadow: 0 0 0 0  rgba(247,37,133,0); }
+  100%     { opacity: 0; box-shadow: 0 0 0 0  rgba(247,37,133,0); }
+}
+
+@keyframes aboutReveal {
+  0%   { clip-path: inset(0 100% 0 0); }
+  100% { clip-path: inset(0 0% 0 0); }
+}
+
+@keyframes slinky {
+  0%, 100% { transform: scaleY(1) translateY(0); }
+  20%      { transform: scaleY(1.45) translateY(-14px); }
+  40%      { transform: scaleY(0.78) translateY(0); }
+  60%      { transform: scaleY(1.18) translateY(-6px); }
+  80%      { transform: scaleY(0.94) translateY(0); }
+}
+
+@keyframes letterStretch {
+  0%, 100% { letter-spacing: 0; transform: scaleX(1); }
+  50%      { letter-spacing: 0.08em; transform: scaleX(1.04); }
+}
+
+@keyframes introFade {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes introExit {
+  0%   { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes notifFade {
+  0%   { opacity: 0; transform: translate(-50%, -50%) translateY(8px); }
+  18%  { opacity: 1; transform: translate(-50%, -50%) translateY(0); }
+  82%  { opacity: 1; transform: translate(-50%, -50%) translateY(0); }
+  100% { opacity: 0; transform: translate(-50%, -50%) translateY(-6px); }
+}
+
+@keyframes dotSyncPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(247,37,133,0.85); opacity: 1; }
+  60%  { box-shadow: 0 0 0 36px rgba(247,37,133,0); opacity: 1; }
+  100% { box-shadow: 0 0 0 0 rgba(247,37,133,0); opacity: 1; }
+}
+
+@keyframes portalBreathe {
+  0%, 100% { opacity: 0.40; transform: scale(0.95); }
+  50%      { opacity: 0.85; transform: scale(1.08); }
+}
+
+@keyframes portalSync {
+  0%   { opacity: 0.4; transform: scale(0.95); }
+  35%  { opacity: 1; transform: scale(1.35); }
+  100% { opacity: 0.4; transform: scale(0.95); }
+}
+
+@keyframes cityFlicker {
+  0%, 100% { opacity: 0.55; }
+  18%      { opacity: 1; }
+  32%      { opacity: 0.72; }
+  47%      { opacity: 0.95; }
+  61%      { opacity: 0.6; }
+  78%      { opacity: 0.88; }
+}
+
+@keyframes carSweep {
+  0%, 88%  { transform: translateX(-220%) skewX(-12deg); opacity: 0; }
+  90%      { transform: translateX(-100%) skewX(-12deg); opacity: 0.55; }
+  94%      { transform: translateX(120%)  skewX(-12deg); opacity: 0.75; }
+  98%      { transform: translateX(360%)  skewX(-12deg); opacity: 0; }
+  100%     { transform: translateX(360%)  skewX(-12deg); opacity: 0; }
+}
+
+.mobile-list { display: none; }
+.mobile-top-bar { display: none; }
+.mobile-spacer { display: none; }
+
+@media (max-width: 768px) {
+  body { height: auto; overflow-y: auto; }
+  .mobile-spacer { display: block !important; height: 44px; }
+  .room-fixed {
+    position: relative !important;
+    top: auto !important; left: auto !important;
+    right: auto !important; bottom: auto !important;
+    height: 56.25vw !important;
+    animation: none !important;
+    overflow: hidden;
+  }
+  .identity-plate { display: none !important; }
+  .mobile-list { display: block; }
+  .mobile-top-bar {
+    display: flex !important;
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 44px;
+    background: rgba(13, 11, 8, 0.92);
+    backdrop-filter: blur(10px);
+    z-index: 100;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    pointer-events: auto;
+  }
+  .grid-top-bar { display: none !important; }
+  .grid-content { padding-top: 60px !important; }
+  .project-page-header { top: 44px !important; }
+  .project-page-hero { padding-top: 44px; }
+}
