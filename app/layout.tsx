@@ -4,8 +4,22 @@ import "./globals.css";
 import { MobileTopBar } from "./components/MobileTopBar";
 
 export const metadata: Metadata = {
-  title: "Cameron Bell — Creative Director",
-  description: "Creative Director. Los Angeles.",
+  metadataBase: new URL("https://cameron-bell.com"),
+  title: "Cameron Bell",
+  description: "Art Director in LA.",
+  openGraph: {
+    title: "Cameron Bell",
+    description: "Art Director in LA.",
+    url: "https://cameron-bell.com",
+    siteName: "Cameron Bell",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Cameron Bell",
+    description: "Art Director in LA.",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
