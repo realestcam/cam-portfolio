@@ -133,12 +133,34 @@ export default function HomePage() {
             }}
           />
 
+          {/* Window ambient light — warm daylight pulse over the window */}
+          {bounds.rw > 0 && (() => {
+            const wx = 0.41, wy = 0.07, ww = 0.16, wh = 0.27;
+            const winLeft = bounds.ox + wx * bounds.rw;
+            const winTop = bounds.oy + wy * bounds.rh;
+            const winW = ww * bounds.rw;
+            const winH = wh * bounds.rh;
+            return (
+              <div
+                aria-hidden
+                style={{
+                  position: "absolute",
+                  left: winLeft, top: winTop, width: winW, height: winH,
+                  pointerEvents: "none",
+                  background: "radial-gradient(ellipse at 50% 45%, rgba(255,225,170,0.55), rgba(255,225,170,0.20) 55%, transparent 78%)",
+                  animation: "cityFlicker 7.5s ease-in-out infinite",
+                  zIndex: 6,
+                }}
+              />
+            );
+          })()}
+
           {/* Dots */}
           {bounds.rw > 0 && projects.filter(p => p.active).map((p) => {
             const left = bounds.ox + (p.hotspot.x / 100) * bounds.rw;
             const top  = bounds.oy + (p.hotspot.y / 100) * bounds.rh;
             const isHovered = hovered === p.id;
-            const color = p.tier === "agency" ? "#F72585" : "#00F5FF";
+            const color = p.brandColor || (p.tier === "agency" ? "#F72585" : "#00F5FF");
 
             return (
               <Link
@@ -166,22 +188,27 @@ export default function HomePage() {
                   </div>
                 )}
 
-                {/* Portal — soft glow over the object */}
+                {/* Dot — white core with pink radiating pulse */}
                 <div style={{
-                  width: isHovered ? 96 : 72,
-                  height: isHovered ? 96 : 72,
+                  width: isHovered ? 14 : 9,
+                  height: isHovered ? 14 : 9,
                   borderRadius: "50%",
-                  background: isHovered
-                    ? `radial-gradient(circle at center, ${color}55, ${color}22 40%, transparent 72%)`
-                    : `radial-gradient(circle at center, ${color}38, ${color}10 38%, transparent 70%)`,
-                  filter: "blur(2px)",
-                  pointerEvents: "none",
-                  transition: "width 0.28s ease, height 0.28s ease, background 0.28s ease",
+                  background: isHovered ? color : "rgba(255,255,255,0.95)",
+                  border: isHovered
+                    ? `1.5px solid ${color}`
+                    : "1.5px solid rgba(255,255,255,0.95)",
+                  boxShadow: isHovered
+                    ? `0 0 0 4px ${color}20, 0 0 14px ${color}45`
+                    : undefined,
+                  filter: "drop-shadow(0 0 2px rgba(0,0,0,0.7))",
+                  opacity: isHovered ? 1 : undefined,
+                  transition: "width 0.22s ease, height 0.22s ease, opacity 0.18s ease",
+                  cursor: "pointer",
                   animation: isHovered
                     ? "none"
                     : introPhase === "sync"
-                    ? "portalSync 1.5s ease-out 1 forwards"
-                    : `portalBreathe 4.5s ease-in-out ${(projects.indexOf(p) / projects.length) * 4.5}s infinite`,
+                    ? "dotSyncPulse 1.5s ease-out 1 forwards"
+                    : `dotPulse 6s ease-in-out ${(projects.indexOf(p) / projects.length) * 6}s infinite`,
                 }} />
               </Link>
             );
@@ -210,7 +237,8 @@ export default function HomePage() {
                   fontSize: "clamp(11px, 1vw, 16px)",
                   fontWeight: 800,
                   letterSpacing: "0.06em",
-                  color: "#1b120b",
+                  color: p.brandColor || "#1b120b",
+                  textShadow: "1px 1px 0 rgba(0,0,0,0.55)",
                   whiteSpace: "nowrap",
                   animation: "aboutReveal 0.7s ease-out forwards",
                 }}>

@@ -105,10 +105,15 @@ body {
     position: relative !important;
     top: auto !important; left: auto !important;
     right: auto !important; bottom: auto !important;
-    height: 56.25vw !important;
+    height: 60vh !important;
     animation: none !important;
     overflow: hidden;
   }
+  .room-fixed img {
+    object-fit: cover !important;
+    object-position: center center !important;
+  }
+  .room-fixed a { display: none !important; }
   .identity-plate { display: none !important; }
   .mobile-list { display: block; }
   .mobile-top-bar {

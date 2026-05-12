@@ -314,6 +314,7 @@ export const projects: Project[] = [
     role: "Creative Director",
     type: "TBWA\\Chiat\\Day · Gatorade",
     tier: "utility",
+    brandColor: "#A4C534",
     hotspot: { x: 55, y: 51 },
     heroImage: "/about/portrait.png",
     writeup: "hey, welcome to my site slash space slash myspace slash my room. appreciate you for coming.\n\ni'm currently a creative director at TBWA\\Chiat\\Day on the Gatorade team, partnered with the illustrious Evan Chiplock. before that, i've worked at MullenLowe, The Many, Anomaly, and even mailroom days at CAA.\n\ni've had a pretty unconventional path to where i am right now, and i have no intention of making it more conventional. which is why you are in my room slash website.\n\ni've worked on major brands, Gatorade most current, but also Acura, eBay, Canada Goose, AB InBev, and a singer who now has a puppet. a couple pieces of work have gotten cool awards.\n\ni just like making cool things with people that make cool things alongside me. so thank you.",

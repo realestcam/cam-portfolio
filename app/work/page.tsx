@@ -241,7 +241,7 @@ export default function GridViewPage() {
                 fontFamily: FONT,
                 fontSize: "clamp(26px, 3.6vw, 42px)",
                 fontWeight: 600,
-                color: "#00b8b8",
+                color: about.brandColor || "#00b8b8",
                 textShadow: "2px 2px 0 #1b120b",
                 textTransform: "uppercase",
                 letterSpacing: "0.04em",
