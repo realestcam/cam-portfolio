@@ -19,11 +19,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `if (typeof history !== 'undefined' && 'scrollRestoration' in history) history.scrollRestoration = 'manual';`,
-          }}
-        />
         <MobileTopBar />
         <div className="mobile-spacer" aria-hidden />
         {children}
