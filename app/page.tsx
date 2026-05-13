@@ -126,31 +126,23 @@ export default function HomePage() {
             }}
           />
 
-          {/* Window ambient light + interior light source + car sweep */}
+          {/* Night window + interior floor-lamp light */}
           {bounds.rw > 0 && (() => {
+            // Window box (tweak if your room art shifts)
             const wx = 0.41, wy = 0.07, ww = 0.16, wh = 0.27;
             const winLeft = bounds.ox + wx * bounds.rw;
             const winTop = bounds.oy + wy * bounds.rh;
             const winW = ww * bounds.rw;
             const winH = wh * bounds.rh;
-            const winCenterX = winLeft + winW / 2;
-            const winCenterY = winTop + winH / 2;
+
+            // Floor lamp position (% of room) — nudge LAMP_X/LAMP_Y to move the pool
+            const LAMP_X = 0.22, LAMP_Y = 0.86;
+            const lampX = bounds.ox + LAMP_X * bounds.rw;
+            const lampY = bounds.oy + LAMP_Y * bounds.rh;
+
             return (
               <>
-                {/* Warm daylight glow over the window */}
-                <div
-                  aria-hidden
-                  style={{
-                    position: "absolute",
-                    left: winLeft, top: winTop, width: winW, height: winH,
-                    pointerEvents: "none",
-                    background: "radial-gradient(ellipse at 50% 45%, rgba(255,225,170,0.55), rgba(255,225,170,0.20) 55%, transparent 78%)",
-                    animation: "cityFlicker 7.5s ease-in-out infinite",
-                    zIndex: 6,
-                  }}
-                />
-
-                {/* Outside-the-window car sweep — passes occasionally */}
+                {/* Outside window — night yellow streetlight base */}
                 <div
                   aria-hidden
                   style={{
@@ -158,75 +150,65 @@ export default function HomePage() {
                     left: winLeft, top: winTop, width: winW, height: winH,
                     pointerEvents: "none",
                     overflow: "hidden",
-                    zIndex: 7,
+                    zIndex: 6,
                   }}
                 >
+                  {/* Faint warm streetlight glow staying behind the glass */}
+                  <div style={{
+                    position: "absolute", inset: 0,
+                    background: "radial-gradient(ellipse at 70% 60%, rgba(255,200,120,0.22), rgba(255,180,90,0.08) 45%, transparent 75%)",
+                    animation: "cityFlicker 7.5s ease-in-out infinite",
+                  }} />
+
+                  {/* Intermittent flicker bloom */}
+                  <div style={{
+                    position: "absolute", inset: 0,
+                    background: "radial-gradient(circle at 35% 40%, rgba(255,230,160,0.35), transparent 45%)",
+                    mixBlendMode: "screen",
+                    animation: "windowFlicker 11s steps(1, end) infinite",
+                  }} />
+
+                  {/* Car passing — bright headlight hot spot, fully bounded */}
                   <div style={{
                     position: "absolute",
-                    top: "38%", height: "22%", width: "55%", left: 0,
-                    background: "linear-gradient(90deg, transparent 0%, rgba(255,245,210,0.72) 45%, rgba(255,220,160,0.55) 55%, transparent 100%)",
-                    filter: "blur(2.5px)",
-                    animation: "carSweep 22s linear infinite",
+                    top: "55%", height: "18%", width: "30%", left: "-30%",
+                    background: "radial-gradient(ellipse at 50% 50%, rgba(255,250,220,0.95) 0%, rgba(255,235,170,0.55) 35%, transparent 70%)",
+                    filter: "blur(2px)",
+                    animation: "carPass 14s ease-in-out infinite",
                   }} />
                 </div>
 
-                {/* Window flicker pulse — subtle bright bloom inside window */}
+                {/* Floor lamp — warm pool on the floor + soft halo */}
                 <div
                   aria-hidden
                   style={{
                     position: "absolute",
-                    left: winLeft, top: winTop, width: winW, height: winH,
+                    left: lampX, top: lampY,
+                    width: bounds.rw * 0.55, height: bounds.rh * 0.42,
+                    transform: "translate(-50%, -50%)",
                     pointerEvents: "none",
-                    background: "radial-gradient(circle at 65% 35%, rgba(255,250,220,0.45), transparent 40%)",
+                    background: "radial-gradient(ellipse 50% 50% at 50% 50%, rgba(255,200,130,0.32) 0%, rgba(255,180,100,0.16) 35%, rgba(255,160,80,0.06) 60%, transparent 80%)",
                     mixBlendMode: "screen",
-                    animation: "windowFlicker 11s steps(1, end) infinite",
-                    zIndex: 7,
+                    filter: "blur(4px)",
+                    animation: "lampBreathe 6s ease-in-out infinite",
+                    zIndex: 5,
                   }}
                 />
 
-                {/* Interior light source — sun beam fanning from window into the room */}
+                {/* Lamp bulb — bright hot center */}
                 <div
                   aria-hidden
                   style={{
                     position: "absolute",
-                    left: winCenterX, top: winCenterY,
-                    width: bounds.rw * 0.9, height: bounds.rh * 0.9,
-                    transform: "translate(-12%, -20%) rotate(22deg)",
-                    transformOrigin: "0% 0%",
+                    left: lampX, top: lampY,
+                    width: bounds.rw * 0.12, height: bounds.rw * 0.12,
+                    transform: "translate(-50%, -55%)",
                     pointerEvents: "none",
-                    background: "linear-gradient(110deg, rgba(255,225,170,0.28) 0%, rgba(255,210,140,0.14) 22%, rgba(255,200,120,0.06) 50%, transparent 78%)",
-                    filter: "blur(14px)",
+                    background: "radial-gradient(circle, rgba(255,225,170,0.42) 0%, rgba(255,200,130,0.18) 40%, transparent 75%)",
                     mixBlendMode: "screen",
-                    animation: "sunBeam 9s ease-in-out infinite",
+                    filter: "blur(2px)",
+                    animation: "lampBreathe 6s ease-in-out infinite",
                     zIndex: 6,
-                  }}
-                />
-
-                {/* Soft warm wash from window direction (top-left source ambient) */}
-                <div
-                  aria-hidden
-                  style={{
-                    position: "absolute",
-                    left: bounds.ox, top: bounds.oy,
-                    width: bounds.rw, height: bounds.rh,
-                    pointerEvents: "none",
-                    background: `radial-gradient(ellipse 70% 60% at ${(wx + ww * 0.5) * 100}% ${(wy + wh * 0.7) * 100}%, rgba(255,220,160,0.18), transparent 60%)`,
-                    mixBlendMode: "screen",
-                    zIndex: 5,
-                  }}
-                />
-
-                {/* Far-corner shadow falloff to sell the directional light */}
-                <div
-                  aria-hidden
-                  style={{
-                    position: "absolute",
-                    left: bounds.ox, top: bounds.oy,
-                    width: bounds.rw, height: bounds.rh,
-                    pointerEvents: "none",
-                    background: "radial-gradient(ellipse 80% 70% at 95% 95%, rgba(0,0,0,0.32), transparent 55%)",
-                    mixBlendMode: "multiply",
-                    zIndex: 5,
                   }}
                 />
               </>
