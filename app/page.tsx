@@ -10,34 +10,62 @@ import { OpeningExperience, CenterNotification } from "./components/OpeningExper
 
 type IntroPhase = "intro" | "notification" | "sync" | "normal";
 
-// Light positions as % of the rendered room. Open /?lightDev=true to edit.
+// Light shapes as polygons in % of the rendered room. Open /?lightDev=true to draw.
 type LightKey = "window" | "lampPool" | "lampBulb";
-type LightConfig = Record<LightKey, { x: number; y: number; w: number; h: number }>;
-const LIGHTS: LightConfig = {
-  window: { x: 41, y: 7, w: 16, h: 27 },
-  lampPool: { x: 22, y: 86, w: 55, h: 42 },
-  lampBulb: { x: 22, y: 82, w: 12, h: 12 },
+type Point = { x: number; y: number };
+type LightShapes = Record<LightKey, Point[][]>;
+
+const DEFAULT_SHAPES: LightShapes = {
+  window: [[
+    { x: 41, y: 7 }, { x: 57, y: 7 },
+    { x: 57, y: 34 }, { x: 41, y: 34 },
+  ]],
+  lampPool: [[
+    { x: 12, y: 78 }, { x: 36, y: 76 },
+    { x: 42, y: 92 }, { x: 18, y: 96 },
+  ]],
+  lampBulb: [[
+    { x: 19, y: 79 }, { x: 25, y: 79 },
+    { x: 25, y: 84 }, { x: 19, y: 84 },
+  ]],
 };
-const LIGHT_INFO: Record<LightKey, { label: string; description: string; color: string; centered: boolean }> = {
+
+const LIGHT_INFO: Record<LightKey, { label: string; description: string; color: string }> = {
   window: {
     label: "Window frame",
-    description: "Top-left corner + size of the window in the wall. The streetlight glow, flicker, and car headlights all stay inside this box.",
+    description: "Outline of the window in the wall. Streetlight glow, flicker, and car headlights all stay inside this shape.",
     color: "#00F5FF",
-    centered: false,
   },
   lampPool: {
     label: "Lamp floor pool",
-    description: "Where the warm pool of light spreads on the floor. Centered on x,y — the box is the full pool size.",
+    description: "Outline of the warm pool of light on the floor. Multiple shapes allowed — useful if the pool wraps around objects.",
     color: "#F72585",
-    centered: true,
   },
   lampBulb: {
     label: "Lamp bulb hotspot",
-    description: "The bright bulb itself — small, centered on x,y. Should sit on the actual bulb in the artwork.",
+    description: "Small bright spot for the bulb itself. Draw a tight shape around the actual bulb.",
     color: "#FFE34F",
-    centered: true,
   },
 };
+
+// Polygon helpers
+function polyBounds(poly: Point[]) {
+  const xs = poly.map(p => p.x), ys = poly.map(p => p.y);
+  const x0 = Math.min(...xs), y0 = Math.min(...ys);
+  const x1 = Math.max(...xs), y1 = Math.max(...ys);
+  return { x: x0, y: y0, w: Math.max(x1 - x0, 0.5), h: Math.max(y1 - y0, 0.5) };
+}
+function polyCentroid(poly: Point[]) {
+  const bb = polyBounds(poly);
+  return { x: bb.x + bb.w / 2, y: bb.y + bb.h / 2 };
+}
+function polyClipPath(poly: Point[]) {
+  const bb = polyBounds(poly);
+  const points = poly.map(p =>
+    `${(((p.x - bb.x) / bb.w) * 100).toFixed(2)}% ${(((p.y - bb.y) / bb.h) * 100).toFixed(2)}%`
+  ).join(", ");
+  return `polygon(${points})`;
+}
 
 function useImageBounds(
   containerRef: React.RefObject<HTMLDivElement | null>,
@@ -80,9 +108,10 @@ export default function HomePage() {
   const [devMode, setDevMode] = useState(false);
   const [lightDev, setLightDev] = useState(false);
   const [devCoords, setDevCoords] = useState<{ x: number; y: number } | null>(null);
-  const [drawing, setDrawing] = useState<null | { x1: number; y1: number; x2: number; y2: number }>(null);
   const [selectedLight, setSelectedLight] = useState<LightKey | null>("lampPool");
-  const [lights, setLights] = useState<LightConfig>(LIGHTS);
+  const [shapes, setShapes] = useState<LightShapes>(DEFAULT_SHAPES);
+  const [draftPoints, setDraftPoints] = useState<Point[]>([]);
+  const [previewMode, setPreviewMode] = useState(false);
   // Always start in "intro" — the pre-hydration script in layout.tsx adds
   // `cb-skip-intro` to <html> for repeat visitors, and CSS hides the overlay.
   // No SSR/client hydration mismatch this way.
@@ -161,94 +190,74 @@ export default function HomePage() {
             }}
           />
 
-          {/* Night window + interior floor-lamp light */}
+          {/* Lights — each polygon becomes a clipped gradient blob */}
           {bounds.rw > 0 && (() => {
-            const winLeft = bounds.ox + (lights.window.x / 100) * bounds.rw;
-            const winTop = bounds.oy + (lights.window.y / 100) * bounds.rh;
-            const winW = (lights.window.w / 100) * bounds.rw;
-            const winH = (lights.window.h / 100) * bounds.rh;
-
-            const lampX = bounds.ox + (lights.lampPool.x / 100) * bounds.rw;
-            const lampY = bounds.oy + (lights.lampPool.y / 100) * bounds.rh;
-            const poolW = (lights.lampPool.w / 100) * bounds.rw;
-            const poolH = (lights.lampPool.h / 100) * bounds.rh;
-
-            const bulbX = bounds.ox + (lights.lampBulb.x / 100) * bounds.rw;
-            const bulbY = bounds.oy + (lights.lampBulb.y / 100) * bounds.rh;
-            const bulbW = (lights.lampBulb.w / 100) * bounds.rw;
-            const bulbH = (lights.lampBulb.h / 100) * bounds.rh;
-
-            return (
-              <>
-                {/* Outside window — night yellow streetlight base */}
+            const polyToDiv = (poly: Point[], children: React.ReactNode, extra: React.CSSProperties = {}) => {
+              const bb = polyBounds(poly);
+              return (
                 <div
                   aria-hidden
                   style={{
                     position: "absolute",
-                    left: winLeft, top: winTop, width: winW, height: winH,
+                    left: bounds.ox + (bb.x / 100) * bounds.rw,
+                    top: bounds.oy + (bb.y / 100) * bounds.rh,
+                    width: (bb.w / 100) * bounds.rw,
+                    height: (bb.h / 100) * bounds.rh,
+                    clipPath: polyClipPath(poly),
                     pointerEvents: "none",
                     overflow: "hidden",
-                    zIndex: 6,
+                    ...extra,
                   }}
                 >
-                  {/* Faint warm streetlight glow staying behind the glass */}
-                  <div style={{
-                    position: "absolute", inset: 0,
-                    background: "radial-gradient(ellipse at 70% 60%, rgba(255,200,120,0.22), rgba(255,180,90,0.08) 45%, transparent 75%)",
-                    animation: "cityFlicker 7.5s ease-in-out infinite",
-                  }} />
-
-                  {/* Intermittent flicker bloom */}
-                  <div style={{
-                    position: "absolute", inset: 0,
-                    background: "radial-gradient(circle at 35% 40%, rgba(255,230,160,0.35), transparent 45%)",
-                    mixBlendMode: "screen",
-                    animation: "windowFlicker 11s steps(1, end) infinite",
-                  }} />
-
-                  {/* Car passing — bright headlight hot spot, fully bounded */}
-                  <div style={{
-                    position: "absolute",
-                    top: "55%", height: "18%", width: "30%", left: "-30%",
-                    background: "radial-gradient(ellipse at 50% 50%, rgba(255,250,220,0.95) 0%, rgba(255,235,170,0.55) 35%, transparent 70%)",
-                    filter: "blur(2px)",
-                    animation: "carPass 14s ease-in-out infinite",
-                  }} />
+                  {children}
                 </div>
+              );
+            };
+            return (
+              <>
+                {/* Window — streetlight + flicker + car pass, all clipped to polygon */}
+                {shapes.window.map((poly, i) => polyToDiv(poly, (
+                  <>
+                    <div style={{
+                      position: "absolute", inset: 0,
+                      background: "radial-gradient(ellipse closest-side at 50% 55%, rgba(255,200,120,0.30), rgba(255,180,90,0.12) 55%, transparent 95%)",
+                      animation: "cityFlicker 7.5s ease-in-out infinite",
+                    }} />
+                    <div style={{
+                      position: "absolute", inset: 0,
+                      background: "radial-gradient(circle closest-side at 35% 40%, rgba(255,230,160,0.45), transparent 70%)",
+                      mixBlendMode: "screen",
+                      animation: "windowFlicker 11s steps(1, end) infinite",
+                    }} />
+                    <div style={{
+                      position: "absolute",
+                      top: "30%", height: "40%", width: "40%", left: "-40%",
+                      background: "radial-gradient(ellipse at 50% 50%, rgba(255,250,220,0.95) 0%, rgba(255,235,170,0.55) 35%, transparent 70%)",
+                      filter: "blur(2px)",
+                      animation: "carPass 14s ease-in-out infinite",
+                    }} />
+                  </>
+                ), { zIndex: 6 + i * 0.01 }))}
 
-                {/* Floor lamp — warm pool on the floor */}
-                <div
-                  aria-hidden
-                  style={{
-                    position: "absolute",
-                    left: lampX, top: lampY,
-                    width: poolW, height: poolH,
-                    transform: "translate(-50%, -50%)",
-                    pointerEvents: "none",
-                    background: "radial-gradient(ellipse 50% 50% at 50% 50%, rgba(255,200,130,0.32) 0%, rgba(255,180,100,0.16) 35%, rgba(255,160,80,0.06) 60%, transparent 80%)",
-                    mixBlendMode: "screen",
-                    filter: "blur(4px)",
+                {/* Lamp pool — warm clipped gradient */}
+                {shapes.lampPool.map((poly, i) => polyToDiv(poly, (
+                  <div style={{
+                    position: "absolute", inset: 0,
+                    background: "radial-gradient(ellipse closest-side at 50% 50%, rgba(255,200,130,0.55) 0%, rgba(255,180,100,0.28) 40%, rgba(255,160,80,0.10) 70%, transparent 100%)",
+                    filter: "blur(6px)",
                     animation: "lampBreathe 6s ease-in-out infinite",
-                    zIndex: 5,
-                  }}
-                />
+                  }} />
+                ), { zIndex: 5 + i * 0.01, mixBlendMode: "screen" }))}
 
                 {/* Lamp bulb — bright hot center */}
-                <div
-                  aria-hidden
-                  style={{
-                    position: "absolute",
-                    left: bulbX, top: bulbY,
-                    width: bulbW, height: bulbH,
-                    transform: "translate(-50%, -50%)",
-                    pointerEvents: "none",
-                    background: "radial-gradient(circle, rgba(255,225,170,0.42) 0%, rgba(255,200,130,0.18) 40%, transparent 75%)",
-                    mixBlendMode: "screen",
+                {shapes.lampBulb.map((poly, i) => polyToDiv(poly, (
+                  <div style={{
+                    position: "absolute", inset: 0,
+                    background: "radial-gradient(circle closest-side at 50% 50%, rgba(255,235,180,0.7) 0%, rgba(255,210,140,0.32) 45%, transparent 90%)",
                     filter: "blur(2px)",
                     animation: "lampBreathe 6s ease-in-out infinite",
-                    zIndex: 6,
-                  }}
-                />
+                  }} />
+                ), { zIndex: 7 + i * 0.01, mixBlendMode: "screen" }))}
               </>
             );
           })()}
@@ -365,114 +374,118 @@ export default function HomePage() {
           })()}
         </div>
 
-        {/* Light dev tool — toggle with ?lightDev=true */}
-        {lightDev && bounds.rw > 0 && (() => {
+        {/* Light dev pen tool — toggle with ?lightDev=true */}
+        {lightDev && !previewMode && bounds.rw > 0 && (() => {
           const toPct = (clientX: number, clientY: number) => {
             const el = containerRef.current;
             if (!el) return null;
             const rect = el.getBoundingClientRect();
             const px = ((clientX - rect.left - bounds.ox) / bounds.rw) * 100;
             const py = ((clientY - rect.top - bounds.oy) / bounds.rh) * 100;
-            return { x: px, y: py };
+            return { x: +px.toFixed(2), y: +py.toFixed(2) };
           };
-          const wireframe = (key: LightKey) => {
-            const cfg = lights[key];
-            const info = LIGHT_INFO[key];
-            const isSelected = selectedLight === key;
-            const left = bounds.ox + (cfg.x / 100) * bounds.rw - (info.centered ? (cfg.w / 100) * bounds.rw / 2 : 0);
-            const top = bounds.oy + (cfg.y / 100) * bounds.rh - (info.centered ? (cfg.h / 100) * bounds.rh / 2 : 0);
-            const width = (cfg.w / 100) * bounds.rw;
-            const height = (cfg.h / 100) * bounds.rh;
-            return (
-              <div key={key} style={{
-                position: "absolute",
-                left, top, width, height,
-                border: `${isSelected ? 2.5 : 1.5}px ${isSelected ? "solid" : "dashed"} ${info.color}`,
-                boxShadow: isSelected ? `0 0 0 1px rgba(0,0,0,0.5), 0 0 14px ${info.color}66` : undefined,
-                pointerEvents: "none",
-                zIndex: 99,
-                fontFamily: '"DM Mono", monospace',
-                fontSize: 10,
-                color: info.color,
-                textShadow: "1px 1px 0 #000",
-              }}>
-                {/* Center crosshair for centered lights */}
-                {info.centered && (
-                  <>
-                    <div style={{
-                      position: "absolute", top: "50%", left: "50%",
-                      width: 12, height: 1, background: info.color,
-                      transform: "translate(-50%, -50%)",
-                    }} />
-                    <div style={{
-                      position: "absolute", top: "50%", left: "50%",
-                      width: 1, height: 12, background: info.color,
-                      transform: "translate(-50%, -50%)",
-                    }} />
-                  </>
-                )}
-                <span style={{
-                  position: "absolute", top: -16, left: 0,
-                  background: "rgba(0,0,0,0.78)", padding: "2px 6px", borderRadius: 2,
-                  letterSpacing: "0.08em", whiteSpace: "nowrap",
-                }}>{info.label.toUpperCase()}{isSelected ? "  ◄ EDITING" : ""}</span>
-              </div>
-            );
+          const toSvgX = (xPct: number) => bounds.ox + (xPct / 100) * bounds.rw;
+          const toSvgY = (yPct: number) => bounds.oy + (yPct / 100) * bounds.rh;
+          const polyStr = (poly: Point[]) => poly.map(p => `${toSvgX(p.x)},${toSvgY(p.y)}`).join(" ");
+
+          const closeShape = () => {
+            if (!selectedLight || draftPoints.length < 3) return;
+            setShapes((prev) => ({
+              ...prev,
+              [selectedLight]: [...prev[selectedLight], draftPoints],
+            }));
+            setDraftPoints([]);
           };
+
           return (
-            <div
+            <svg
               style={{
                 position: "absolute", inset: 0, zIndex: 98,
                 cursor: selectedLight ? "crosshair" : "default",
+                pointerEvents: selectedLight ? "auto" : "none",
               }}
-              onMouseDown={(e) => {
+              onClick={(e) => {
                 if (!selectedLight) return;
                 const p = toPct(e.clientX, e.clientY);
                 if (!p) return;
-                setDrawing({ x1: p.x, y1: p.y, x2: p.x, y2: p.y });
+                // Click near first point closes the shape
+                if (draftPoints.length >= 3) {
+                  const first = draftPoints[0];
+                  const dx = p.x - first.x, dy = p.y - first.y;
+                  if (dx * dx + dy * dy < 4) {
+                    closeShape();
+                    return;
+                  }
+                }
+                setDraftPoints([...draftPoints, p]);
               }}
-              onMouseMove={(e) => {
-                if (!drawing) return;
-                const p = toPct(e.clientX, e.clientY);
-                if (!p) return;
-                setDrawing({ ...drawing, x2: p.x, y2: p.y });
-              }}
-              onMouseUp={() => {
-                if (!drawing || !selectedLight) { setDrawing(null); return; }
-                const x = Math.min(drawing.x1, drawing.x2);
-                const y = Math.min(drawing.y1, drawing.y2);
-                const w = Math.abs(drawing.x2 - drawing.x1);
-                const h = Math.abs(drawing.y2 - drawing.y1);
-                const info = LIGHT_INFO[selectedLight];
-                // For centered lights, store the center as x,y
-                const newCfg = info.centered
-                  ? { x: +(x + w / 2).toFixed(2), y: +(y + h / 2).toFixed(2), w: +w.toFixed(2), h: +h.toFixed(2) }
-                  : { x: +x.toFixed(2), y: +y.toFixed(2), w: +w.toFixed(2), h: +h.toFixed(2) };
-                setLights((prev) => ({ ...prev, [selectedLight]: newCfg }));
-                setDrawing(null);
-              }}
+              onDoubleClick={() => closeShape()}
             >
-              {(["window", "lampPool", "lampBulb"] as LightKey[]).map(wireframe)}
+              {/* Existing shapes for all lights — faded for non-selected */}
+              {(["window", "lampPool", "lampBulb"] as LightKey[]).map((key) => {
+                const info = LIGHT_INFO[key];
+                const isSelected = selectedLight === key;
+                return shapes[key].map((poly, i) => (
+                  <polygon
+                    key={`${key}-${i}`}
+                    points={polyStr(poly)}
+                    fill={isSelected ? `${info.color}22` : `${info.color}10`}
+                    stroke={info.color}
+                    strokeWidth={isSelected ? 2 : 1}
+                    strokeDasharray={isSelected ? "none" : "4 4"}
+                    opacity={isSelected ? 1 : 0.5}
+                  />
+                ));
+              })}
 
-              {drawing && (() => {
-                const x = Math.min(drawing.x1, drawing.x2);
-                const y = Math.min(drawing.y1, drawing.y2);
-                const w = Math.abs(drawing.x2 - drawing.x1);
-                const h = Math.abs(drawing.y2 - drawing.y1);
-                return (
-                  <div style={{
-                    position: "absolute",
-                    left: bounds.ox + (x / 100) * bounds.rw,
-                    top: bounds.oy + (y / 100) * bounds.rh,
-                    width: (w / 100) * bounds.rw,
-                    height: (h / 100) * bounds.rh,
-                    border: "2px solid #fff",
-                    background: "rgba(255,255,255,0.10)",
-                    pointerEvents: "none",
-                  }} />
-                );
-              })()}
-            </div>
+              {/* Light name labels at centroid */}
+              {(["window", "lampPool", "lampBulb"] as LightKey[]).map((key) => {
+                const info = LIGHT_INFO[key];
+                return shapes[key].map((poly, i) => {
+                  const c = polyCentroid(poly);
+                  return (
+                    <text
+                      key={`label-${key}-${i}`}
+                      x={toSvgX(c.x)} y={toSvgY(c.y)}
+                      fontFamily='"DM Mono", monospace'
+                      fontSize={10}
+                      fill={info.color}
+                      stroke="#000"
+                      strokeWidth={3}
+                      paintOrder="stroke"
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      style={{ pointerEvents: "none", letterSpacing: "0.1em" }}
+                    >
+                      {info.label.toUpperCase()}{shapes[key].length > 1 ? ` ${i + 1}` : ""}
+                    </text>
+                  );
+                });
+              })}
+
+              {/* Draft polygon in progress */}
+              {selectedLight && draftPoints.length > 0 && (
+                <>
+                  <polyline
+                    points={polyStr(draftPoints)}
+                    fill="none"
+                    stroke="#fff"
+                    strokeWidth={1.5}
+                    strokeDasharray="3 3"
+                  />
+                  {draftPoints.map((p, i) => (
+                    <circle
+                      key={i}
+                      cx={toSvgX(p.x)} cy={toSvgY(p.y)}
+                      r={i === 0 ? 6 : 4}
+                      fill={i === 0 ? "#FFE34F" : "#fff"}
+                      stroke="#000"
+                      strokeWidth={1}
+                    />
+                  ))}
+                </>
+              )}
+            </svg>
           );
         })()}
 
@@ -536,27 +549,42 @@ export default function HomePage() {
             border: "1px solid rgba(247,37,133,0.5)",
             borderRadius: 6, padding: "14px 16px",
             fontFamily: '"DM Mono", monospace', fontSize: 11,
-            color: "#fff", width: 320, lineHeight: 1.55,
+            color: "#fff", width: 340, lineHeight: 1.55,
             pointerEvents: "auto",
             maxHeight: "92vh", overflowY: "auto",
           }}>
-            <div style={{ color: "#F72585", letterSpacing: "0.14em", marginBottom: 4, fontSize: 10 }}>
-              LIGHT EDITOR
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+              <span style={{ color: "#F72585", letterSpacing: "0.14em", fontSize: 10 }}>
+                LIGHT PEN
+              </span>
+              <button
+                onClick={() => { setPreviewMode(!previewMode); setDraftPoints([]); }}
+                style={{
+                  background: previewMode ? "#FFE34F" : "transparent",
+                  color: previewMode ? "#000" : "#FFE34F",
+                  border: "1px solid #FFE34F", borderRadius: 3,
+                  padding: "4px 10px", fontFamily: '"DM Mono", monospace',
+                  fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase",
+                  cursor: "pointer",
+                }}
+              >
+                {previewMode ? "◀ Edit" : "▶ Run preview"}
+              </button>
             </div>
-            <div style={{ opacity: 0.65, fontSize: 10, marginBottom: 14, lineHeight: 1.5 }}>
-              Pick a light → drag a box on the room where it should sit. The lighting updates live.
+            <div style={{ opacity: 0.65, fontSize: 10, marginBottom: 12, lineHeight: 1.5 }}>
+              {previewMode
+                ? "Lights are rendering live. Hit Edit to keep drawing."
+                : "Pick a light → click points around it on the room. Click the YELLOW start dot or double-click to close the shape. Repeat for multiple shapes."}
             </div>
 
             {(["window", "lampPool", "lampBulb"] as LightKey[]).map((key) => {
               const info = LIGHT_INFO[key];
-              const cfg = lights[key];
               const isSelected = selectedLight === key;
+              const count = shapes[key].length;
               return (
                 <div
                   key={key}
-                  onClick={() => setSelectedLight(isSelected ? null : key)}
                   style={{
-                    cursor: "pointer",
                     padding: "10px 12px",
                     marginBottom: 8,
                     border: `1px solid ${isSelected ? info.color : "rgba(255,255,255,0.12)"}`,
@@ -566,7 +594,10 @@ export default function HomePage() {
                     transition: "all 0.15s ease",
                   }}
                 >
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <div
+                    onClick={() => { setSelectedLight(isSelected ? null : key); setDraftPoints([]); }}
+                    style={{ cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between" }}
+                  >
                     <span style={{
                       color: info.color, letterSpacing: "0.08em",
                       textTransform: "uppercase", fontSize: 10, fontWeight: 500,
@@ -577,17 +608,56 @@ export default function HomePage() {
                       fontSize: 9, color: isSelected ? info.color : "rgba(255,255,255,0.35)",
                       letterSpacing: "0.1em",
                     }}>
-                      {isSelected ? "EDITING" : "click to edit"}
+                      {isSelected ? "DRAWING" : "click to draw"}
                     </span>
                   </div>
                   <div style={{ fontSize: 10, opacity: 0.55, marginTop: 4, lineHeight: 1.45 }}>
                     {info.description}
                   </div>
-                  <div style={{
-                    fontSize: 10, color: "#FFE34F", marginTop: 6,
-                    fontFamily: '"DM Mono", monospace',
-                  }}>
-                    {info.centered ? "center" : "top-left"}: {cfg.x}, {cfg.y} &nbsp;·&nbsp; size: {cfg.w}×{cfg.h}
+                  <div style={{ display: "flex", gap: 6, marginTop: 8, alignItems: "center" }}>
+                    <span style={{ fontSize: 10, color: "#FFE34F" }}>
+                      {count} shape{count === 1 ? "" : "s"}
+                    </span>
+                    <div style={{ flex: 1 }} />
+                    {isSelected && draftPoints.length > 0 && (
+                      <button
+                        onClick={() => setDraftPoints([])}
+                        style={{
+                          background: "transparent", border: "1px solid rgba(255,255,255,0.22)",
+                          color: "#fff", padding: "3px 8px", borderRadius: 2,
+                          fontFamily: '"DM Mono", monospace', fontSize: 9,
+                          cursor: "pointer", letterSpacing: "0.1em",
+                        }}
+                      >
+                        Cancel draft ({draftPoints.length})
+                      </button>
+                    )}
+                    {count > 0 && (
+                      <button
+                        onClick={() => setShapes(prev => ({ ...prev, [key]: prev[key].slice(0, -1) }))}
+                        style={{
+                          background: "transparent", border: "1px solid rgba(255,255,255,0.22)",
+                          color: "#fff", padding: "3px 8px", borderRadius: 2,
+                          fontFamily: '"DM Mono", monospace', fontSize: 9,
+                          cursor: "pointer", letterSpacing: "0.1em",
+                        }}
+                      >
+                        Undo
+                      </button>
+                    )}
+                    {count > 0 && (
+                      <button
+                        onClick={() => setShapes(prev => ({ ...prev, [key]: [] }))}
+                        style={{
+                          background: "transparent", border: "1px solid rgba(255,80,80,0.4)",
+                          color: "#ff8080", padding: "3px 8px", borderRadius: 2,
+                          fontFamily: '"DM Mono", monospace', fontSize: 9,
+                          cursor: "pointer", letterSpacing: "0.1em",
+                        }}
+                      >
+                        Clear
+                      </button>
+                    )}
                   </div>
                 </div>
               );
@@ -595,7 +665,7 @@ export default function HomePage() {
 
             <button
               onClick={() => {
-                const out = `const LIGHTS: LightConfig = ${JSON.stringify(lights, null, 2)};`;
+                const out = `const DEFAULT_SHAPES: LightShapes = ${JSON.stringify(shapes, null, 2)};`;
                 console.log(out);
                 try { navigator.clipboard.writeText(out); } catch {}
               }}
@@ -608,10 +678,10 @@ export default function HomePage() {
                 letterSpacing: "0.12em", textTransform: "uppercase",
               }}
             >
-              Copy LIGHTS config
+              Copy shapes config
             </button>
             <button
-              onClick={() => setLights(LIGHTS)}
+              onClick={() => { setShapes(DEFAULT_SHAPES); setDraftPoints([]); }}
               style={{
                 width: "100%", marginTop: 6, padding: "6px 12px",
                 background: "transparent",
@@ -621,7 +691,7 @@ export default function HomePage() {
                 letterSpacing: "0.12em", textTransform: "uppercase",
               }}
             >
-              Reset to saved
+              Reset all shapes
             </button>
           </div>
         )}
