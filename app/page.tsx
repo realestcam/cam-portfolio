@@ -123,10 +123,17 @@ export default function HomePage() {
   const [settings, setSettings] = useState<Record<LightKey, LightSettings>>(DEFAULT_SETTINGS);
   const [draftPoints, setDraftPoints] = useState<Point[]>([]);
   const [previewMode, setPreviewMode] = useState(false);
-  // Always start in "intro" — the pre-hydration script in layout.tsx adds
-  // `cb-skip-intro` to <html> for repeat visitors, and CSS hides the overlay.
-  // No SSR/client hydration mismatch this way.
-  const [introPhase, setIntroPhase] = useState<IntroPhase>("intro");
+  // On hard loads SSR renders "intro" and the pre-hydration script in
+  // layout.tsx hides the overlay via CSS for repeat visitors. On client
+  // navigations (e.g. back from /work/[id]) there's no SSR — read
+  // localStorage here so returning guests skip straight to "normal".
+  const [introPhase, setIntroPhase] = useState<IntroPhase>(() => {
+    if (typeof window === "undefined") return "intro";
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("intro") === "true") return "intro";
+    if (params.get("skipIntro") === "true") return "normal";
+    return window.localStorage.getItem("cb_hasSeenIntro") === "1" ? "normal" : "intro";
+  });
   const [roomSrc, setRoomSrc] = useState("/Clean.webp");
   const containerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
