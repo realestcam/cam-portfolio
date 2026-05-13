@@ -10,12 +10,33 @@ import { OpeningExperience, CenterNotification } from "./components/OpeningExper
 
 type IntroPhase = "intro" | "notification" | "sync" | "normal";
 
-// Light positions as % of the rendered room. Edit these to move lights.
-// Tip: open /?lightDev=true to see wireframes + drag-draw new bounds.
-const LIGHTS = {
-  window: { x: 41, y: 7, w: 16, h: 27 },  // night window frame
-  lampPool: { x: 22, y: 86, w: 55, h: 42 }, // warm floor pool (centered on x,y)
-  lampBulb: { x: 22, y: 82, w: 12, h: 12 }, // bright bulb spot (centered)
+// Light positions as % of the rendered room. Open /?lightDev=true to edit.
+type LightKey = "window" | "lampPool" | "lampBulb";
+type LightConfig = Record<LightKey, { x: number; y: number; w: number; h: number }>;
+const LIGHTS: LightConfig = {
+  window: { x: 41, y: 7, w: 16, h: 27 },
+  lampPool: { x: 22, y: 86, w: 55, h: 42 },
+  lampBulb: { x: 22, y: 82, w: 12, h: 12 },
+};
+const LIGHT_INFO: Record<LightKey, { label: string; description: string; color: string; centered: boolean }> = {
+  window: {
+    label: "Window frame",
+    description: "Top-left corner + size of the window in the wall. The streetlight glow, flicker, and car headlights all stay inside this box.",
+    color: "#00F5FF",
+    centered: false,
+  },
+  lampPool: {
+    label: "Lamp floor pool",
+    description: "Where the warm pool of light spreads on the floor. Centered on x,y — the box is the full pool size.",
+    color: "#F72585",
+    centered: true,
+  },
+  lampBulb: {
+    label: "Lamp bulb hotspot",
+    description: "The bright bulb itself — small, centered on x,y. Should sit on the actual bulb in the artwork.",
+    color: "#FFE34F",
+    centered: true,
+  },
 };
 
 function useImageBounds(
@@ -60,7 +81,8 @@ export default function HomePage() {
   const [lightDev, setLightDev] = useState(false);
   const [devCoords, setDevCoords] = useState<{ x: number; y: number } | null>(null);
   const [drawing, setDrawing] = useState<null | { x1: number; y1: number; x2: number; y2: number }>(null);
-  const [lastBox, setLastBox] = useState<null | { x: number; y: number; w: number; h: number }>(null);
+  const [selectedLight, setSelectedLight] = useState<LightKey | null>("lampPool");
+  const [lights, setLights] = useState<LightConfig>(LIGHTS);
   // Always start in "intro" — the pre-hydration script in layout.tsx adds
   // `cb-skip-intro` to <html> for repeat visitors, and CSS hides the overlay.
   // No SSR/client hydration mismatch this way.
@@ -141,20 +163,20 @@ export default function HomePage() {
 
           {/* Night window + interior floor-lamp light */}
           {bounds.rw > 0 && (() => {
-            const winLeft = bounds.ox + (LIGHTS.window.x / 100) * bounds.rw;
-            const winTop = bounds.oy + (LIGHTS.window.y / 100) * bounds.rh;
-            const winW = (LIGHTS.window.w / 100) * bounds.rw;
-            const winH = (LIGHTS.window.h / 100) * bounds.rh;
+            const winLeft = bounds.ox + (lights.window.x / 100) * bounds.rw;
+            const winTop = bounds.oy + (lights.window.y / 100) * bounds.rh;
+            const winW = (lights.window.w / 100) * bounds.rw;
+            const winH = (lights.window.h / 100) * bounds.rh;
 
-            const lampX = bounds.ox + (LIGHTS.lampPool.x / 100) * bounds.rw;
-            const lampY = bounds.oy + (LIGHTS.lampPool.y / 100) * bounds.rh;
-            const poolW = (LIGHTS.lampPool.w / 100) * bounds.rw;
-            const poolH = (LIGHTS.lampPool.h / 100) * bounds.rh;
+            const lampX = bounds.ox + (lights.lampPool.x / 100) * bounds.rw;
+            const lampY = bounds.oy + (lights.lampPool.y / 100) * bounds.rh;
+            const poolW = (lights.lampPool.w / 100) * bounds.rw;
+            const poolH = (lights.lampPool.h / 100) * bounds.rh;
 
-            const bulbX = bounds.ox + (LIGHTS.lampBulb.x / 100) * bounds.rw;
-            const bulbY = bounds.oy + (LIGHTS.lampBulb.y / 100) * bounds.rh;
-            const bulbW = (LIGHTS.lampBulb.w / 100) * bounds.rw;
-            const bulbH = (LIGHTS.lampBulb.h / 100) * bounds.rh;
+            const bulbX = bounds.ox + (lights.lampBulb.x / 100) * bounds.rw;
+            const bulbY = bounds.oy + (lights.lampBulb.y / 100) * bounds.rh;
+            const bulbW = (lights.lampBulb.w / 100) * bounds.rw;
+            const bulbH = (lights.lampBulb.h / 100) * bounds.rh;
 
             return (
               <>
@@ -353,28 +375,47 @@ export default function HomePage() {
             const py = ((clientY - rect.top - bounds.oy) / bounds.rh) * 100;
             return { x: px, y: py };
           };
-          const wireframe = (cfg: { x: number; y: number; w: number; h: number }, label: string, color: string, centered: boolean) => {
-            const left = bounds.ox + (cfg.x / 100) * bounds.rw - (centered ? (cfg.w / 100) * bounds.rw / 2 : 0);
-            const top = bounds.oy + (cfg.y / 100) * bounds.rh - (centered ? (cfg.h / 100) * bounds.rh / 2 : 0);
+          const wireframe = (key: LightKey) => {
+            const cfg = lights[key];
+            const info = LIGHT_INFO[key];
+            const isSelected = selectedLight === key;
+            const left = bounds.ox + (cfg.x / 100) * bounds.rw - (info.centered ? (cfg.w / 100) * bounds.rw / 2 : 0);
+            const top = bounds.oy + (cfg.y / 100) * bounds.rh - (info.centered ? (cfg.h / 100) * bounds.rh / 2 : 0);
             const width = (cfg.w / 100) * bounds.rw;
             const height = (cfg.h / 100) * bounds.rh;
             return (
-              <div key={label} style={{
+              <div key={key} style={{
                 position: "absolute",
                 left, top, width, height,
-                border: `1.5px dashed ${color}`,
+                border: `${isSelected ? 2.5 : 1.5}px ${isSelected ? "solid" : "dashed"} ${info.color}`,
+                boxShadow: isSelected ? `0 0 0 1px rgba(0,0,0,0.5), 0 0 14px ${info.color}66` : undefined,
                 pointerEvents: "none",
                 zIndex: 99,
                 fontFamily: '"DM Mono", monospace',
                 fontSize: 10,
-                color,
+                color: info.color,
                 textShadow: "1px 1px 0 #000",
               }}>
+                {/* Center crosshair for centered lights */}
+                {info.centered && (
+                  <>
+                    <div style={{
+                      position: "absolute", top: "50%", left: "50%",
+                      width: 12, height: 1, background: info.color,
+                      transform: "translate(-50%, -50%)",
+                    }} />
+                    <div style={{
+                      position: "absolute", top: "50%", left: "50%",
+                      width: 1, height: 12, background: info.color,
+                      transform: "translate(-50%, -50%)",
+                    }} />
+                  </>
+                )}
                 <span style={{
                   position: "absolute", top: -16, left: 0,
-                  background: "rgba(0,0,0,0.7)", padding: "2px 5px", borderRadius: 2,
-                  letterSpacing: "0.08em",
-                }}>{label} · {cfg.x},{cfg.y} · {cfg.w}×{cfg.h}</span>
+                  background: "rgba(0,0,0,0.78)", padding: "2px 6px", borderRadius: 2,
+                  letterSpacing: "0.08em", whiteSpace: "nowrap",
+                }}>{info.label.toUpperCase()}{isSelected ? "  ◄ EDITING" : ""}</span>
               </div>
             );
           };
@@ -382,9 +423,10 @@ export default function HomePage() {
             <div
               style={{
                 position: "absolute", inset: 0, zIndex: 98,
-                cursor: "crosshair",
+                cursor: selectedLight ? "crosshair" : "default",
               }}
               onMouseDown={(e) => {
+                if (!selectedLight) return;
                 const p = toPct(e.clientX, e.clientY);
                 if (!p) return;
                 setDrawing({ x1: p.x, y1: p.y, x2: p.x, y2: p.y });
@@ -396,29 +438,21 @@ export default function HomePage() {
                 setDrawing({ ...drawing, x2: p.x, y2: p.y });
               }}
               onMouseUp={() => {
-                if (!drawing) return;
+                if (!drawing || !selectedLight) { setDrawing(null); return; }
                 const x = Math.min(drawing.x1, drawing.x2);
                 const y = Math.min(drawing.y1, drawing.y2);
                 const w = Math.abs(drawing.x2 - drawing.x1);
                 const h = Math.abs(drawing.y2 - drawing.y1);
-                const box = {
-                  x: +x.toFixed(2),
-                  y: +y.toFixed(2),
-                  w: +w.toFixed(2),
-                  h: +h.toFixed(2),
-                };
-                const cx = +(x + w / 2).toFixed(2);
-                const cy = +(y + h / 2).toFixed(2);
-                const out = `{ x: ${box.x}, y: ${box.y}, w: ${box.w}, h: ${box.h} }  // center: ${cx}, ${cy}`;
-                console.log(out);
-                try { navigator.clipboard.writeText(out); } catch {}
-                setLastBox(box);
+                const info = LIGHT_INFO[selectedLight];
+                // For centered lights, store the center as x,y
+                const newCfg = info.centered
+                  ? { x: +(x + w / 2).toFixed(2), y: +(y + h / 2).toFixed(2), w: +w.toFixed(2), h: +h.toFixed(2) }
+                  : { x: +x.toFixed(2), y: +y.toFixed(2), w: +w.toFixed(2), h: +h.toFixed(2) };
+                setLights((prev) => ({ ...prev, [selectedLight]: newCfg }));
                 setDrawing(null);
               }}
             >
-              {wireframe(LIGHTS.window, "WINDOW", "#00F5FF", false)}
-              {wireframe(LIGHTS.lampPool, "LAMP POOL", "#F72585", true)}
-              {wireframe(LIGHTS.lampBulb, "BULB", "#F7C100", true)}
+              {(["window", "lampPool", "lampBulb"] as LightKey[]).map(wireframe)}
 
               {drawing && (() => {
                 const x = Math.min(drawing.x1, drawing.x2);
@@ -433,7 +467,7 @@ export default function HomePage() {
                     width: (w / 100) * bounds.rw,
                     height: (h / 100) * bounds.rh,
                     border: "2px solid #fff",
-                    background: "rgba(255,255,255,0.08)",
+                    background: "rgba(255,255,255,0.10)",
                     pointerEvents: "none",
                   }} />
                 );
@@ -497,31 +531,98 @@ export default function HomePage() {
         )}
         {lightDev && (
           <div style={{
-            position: "absolute", top: 16, left: 16, zIndex: 100,
-            background: "rgba(0,0,0,0.85)",
-            border: "1px solid #F72585",
-            borderRadius: 4, padding: "10px 14px",
+            position: "fixed", top: 16, left: 16, zIndex: 100,
+            background: "rgba(0,0,0,0.92)",
+            border: "1px solid rgba(247,37,133,0.5)",
+            borderRadius: 6, padding: "14px 16px",
             fontFamily: '"DM Mono", monospace', fontSize: 11,
-            color: "#fff", maxWidth: 280, lineHeight: 1.5,
-            pointerEvents: "none",
+            color: "#fff", width: 320, lineHeight: 1.55,
+            pointerEvents: "auto",
+            maxHeight: "92vh", overflowY: "auto",
           }}>
-            <div style={{ color: "#F72585", letterSpacing: "0.12em", marginBottom: 6 }}>
-              LIGHT DEV
+            <div style={{ color: "#F72585", letterSpacing: "0.14em", marginBottom: 4, fontSize: 10 }}>
+              LIGHT EDITOR
             </div>
-            <div style={{ opacity: 0.8, fontSize: 10 }}>
-              Drag a box where the light should be.<br />
-              Coords logged + copied to clipboard.
+            <div style={{ opacity: 0.65, fontSize: 10, marginBottom: 14, lineHeight: 1.5 }}>
+              Pick a light → drag a box on the room where it should sit. The lighting updates live.
             </div>
-            {lastBox && (
-              <div style={{
-                marginTop: 8, paddingTop: 8,
-                borderTop: "1px solid rgba(255,255,255,0.15)",
-                color: "#FFE34F", fontSize: 10,
-              }}>
-                last: x:{lastBox.x} y:{lastBox.y} w:{lastBox.w} h:{lastBox.h}<br />
-                center: {(lastBox.x + lastBox.w / 2).toFixed(2)}, {(lastBox.y + lastBox.h / 2).toFixed(2)}
-              </div>
-            )}
+
+            {(["window", "lampPool", "lampBulb"] as LightKey[]).map((key) => {
+              const info = LIGHT_INFO[key];
+              const cfg = lights[key];
+              const isSelected = selectedLight === key;
+              return (
+                <div
+                  key={key}
+                  onClick={() => setSelectedLight(isSelected ? null : key)}
+                  style={{
+                    cursor: "pointer",
+                    padding: "10px 12px",
+                    marginBottom: 8,
+                    border: `1px solid ${isSelected ? info.color : "rgba(255,255,255,0.12)"}`,
+                    borderLeft: `4px solid ${info.color}`,
+                    borderRadius: 3,
+                    background: isSelected ? "rgba(255,255,255,0.04)" : "transparent",
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <span style={{
+                      color: info.color, letterSpacing: "0.08em",
+                      textTransform: "uppercase", fontSize: 10, fontWeight: 500,
+                    }}>
+                      {info.label}
+                    </span>
+                    <span style={{
+                      fontSize: 9, color: isSelected ? info.color : "rgba(255,255,255,0.35)",
+                      letterSpacing: "0.1em",
+                    }}>
+                      {isSelected ? "EDITING" : "click to edit"}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: 10, opacity: 0.55, marginTop: 4, lineHeight: 1.45 }}>
+                    {info.description}
+                  </div>
+                  <div style={{
+                    fontSize: 10, color: "#FFE34F", marginTop: 6,
+                    fontFamily: '"DM Mono", monospace',
+                  }}>
+                    {info.centered ? "center" : "top-left"}: {cfg.x}, {cfg.y} &nbsp;·&nbsp; size: {cfg.w}×{cfg.h}
+                  </div>
+                </div>
+              );
+            })}
+
+            <button
+              onClick={() => {
+                const out = `const LIGHTS: LightConfig = ${JSON.stringify(lights, null, 2)};`;
+                console.log(out);
+                try { navigator.clipboard.writeText(out); } catch {}
+              }}
+              style={{
+                width: "100%", marginTop: 10, padding: "8px 12px",
+                background: "rgba(247,37,133,0.18)",
+                border: "1px solid #F72585",
+                color: "#fff", cursor: "pointer", borderRadius: 3,
+                fontFamily: '"DM Mono", monospace', fontSize: 10,
+                letterSpacing: "0.12em", textTransform: "uppercase",
+              }}
+            >
+              Copy LIGHTS config
+            </button>
+            <button
+              onClick={() => setLights(LIGHTS)}
+              style={{
+                width: "100%", marginTop: 6, padding: "6px 12px",
+                background: "transparent",
+                border: "1px solid rgba(255,255,255,0.18)",
+                color: "rgba(255,255,255,0.55)", cursor: "pointer", borderRadius: 3,
+                fontFamily: '"DM Mono", monospace', fontSize: 9,
+                letterSpacing: "0.12em", textTransform: "uppercase",
+              }}
+            >
+              Reset to saved
+            </button>
           </div>
         )}
         {devMode && devCoords && (
