@@ -10,6 +10,14 @@ import { OpeningExperience, CenterNotification } from "./components/OpeningExper
 
 type IntroPhase = "intro" | "notification" | "sync" | "normal";
 
+// Light positions as % of the rendered room. Edit these to move lights.
+// Tip: open /?lightDev=true to see wireframes + drag-draw new bounds.
+const LIGHTS = {
+  window: { x: 41, y: 7, w: 16, h: 27 },  // night window frame
+  lampPool: { x: 22, y: 86, w: 55, h: 42 }, // warm floor pool (centered on x,y)
+  lampBulb: { x: 22, y: 82, w: 12, h: 12 }, // bright bulb spot (centered)
+};
+
 function useImageBounds(
   containerRef: React.RefObject<HTMLDivElement | null>,
   naturalSize: { w: number; h: number }
@@ -49,7 +57,10 @@ export default function HomePage() {
   const [naturalSize, setNaturalSize] = useState({ w: 0, h: 0 });
   const [hovered, setHovered] = useState<string | null>(null);
   const [devMode, setDevMode] = useState(false);
+  const [lightDev, setLightDev] = useState(false);
   const [devCoords, setDevCoords] = useState<{ x: number; y: number } | null>(null);
+  const [drawing, setDrawing] = useState<null | { x1: number; y1: number; x2: number; y2: number }>(null);
+  const [lastBox, setLastBox] = useState<null | { x: number; y: number; w: number; h: number }>(null);
   // Always start in "intro" — the pre-hydration script in layout.tsx adds
   // `cb-skip-intro` to <html> for repeat visitors, and CSS hides the overlay.
   // No SSR/client hydration mismatch this way.
@@ -60,7 +71,9 @@ export default function HomePage() {
   const bounds = useImageBounds(containerRef, naturalSize);
 
   useEffect(() => {
-    setDevMode(new URLSearchParams(window.location.search).get("dev") === "true");
+    const params = new URLSearchParams(window.location.search);
+    setDevMode(params.get("dev") === "true");
+    setLightDev(params.get("lightDev") === "true");
     const img = imgRef.current;
     if (img && img.complete && img.naturalWidth) {
       setNaturalSize({ w: img.naturalWidth, h: img.naturalHeight });
@@ -128,17 +141,20 @@ export default function HomePage() {
 
           {/* Night window + interior floor-lamp light */}
           {bounds.rw > 0 && (() => {
-            // Window box (tweak if your room art shifts)
-            const wx = 0.41, wy = 0.07, ww = 0.16, wh = 0.27;
-            const winLeft = bounds.ox + wx * bounds.rw;
-            const winTop = bounds.oy + wy * bounds.rh;
-            const winW = ww * bounds.rw;
-            const winH = wh * bounds.rh;
+            const winLeft = bounds.ox + (LIGHTS.window.x / 100) * bounds.rw;
+            const winTop = bounds.oy + (LIGHTS.window.y / 100) * bounds.rh;
+            const winW = (LIGHTS.window.w / 100) * bounds.rw;
+            const winH = (LIGHTS.window.h / 100) * bounds.rh;
 
-            // Floor lamp position (% of room) — nudge LAMP_X/LAMP_Y to move the pool
-            const LAMP_X = 0.22, LAMP_Y = 0.86;
-            const lampX = bounds.ox + LAMP_X * bounds.rw;
-            const lampY = bounds.oy + LAMP_Y * bounds.rh;
+            const lampX = bounds.ox + (LIGHTS.lampPool.x / 100) * bounds.rw;
+            const lampY = bounds.oy + (LIGHTS.lampPool.y / 100) * bounds.rh;
+            const poolW = (LIGHTS.lampPool.w / 100) * bounds.rw;
+            const poolH = (LIGHTS.lampPool.h / 100) * bounds.rh;
+
+            const bulbX = bounds.ox + (LIGHTS.lampBulb.x / 100) * bounds.rw;
+            const bulbY = bounds.oy + (LIGHTS.lampBulb.y / 100) * bounds.rh;
+            const bulbW = (LIGHTS.lampBulb.w / 100) * bounds.rw;
+            const bulbH = (LIGHTS.lampBulb.h / 100) * bounds.rh;
 
             return (
               <>
@@ -178,13 +194,13 @@ export default function HomePage() {
                   }} />
                 </div>
 
-                {/* Floor lamp — warm pool on the floor + soft halo */}
+                {/* Floor lamp — warm pool on the floor */}
                 <div
                   aria-hidden
                   style={{
                     position: "absolute",
                     left: lampX, top: lampY,
-                    width: bounds.rw * 0.55, height: bounds.rh * 0.42,
+                    width: poolW, height: poolH,
                     transform: "translate(-50%, -50%)",
                     pointerEvents: "none",
                     background: "radial-gradient(ellipse 50% 50% at 50% 50%, rgba(255,200,130,0.32) 0%, rgba(255,180,100,0.16) 35%, rgba(255,160,80,0.06) 60%, transparent 80%)",
@@ -200,9 +216,9 @@ export default function HomePage() {
                   aria-hidden
                   style={{
                     position: "absolute",
-                    left: lampX, top: lampY,
-                    width: bounds.rw * 0.12, height: bounds.rw * 0.12,
-                    transform: "translate(-50%, -55%)",
+                    left: bulbX, top: bulbY,
+                    width: bulbW, height: bulbH,
+                    transform: "translate(-50%, -50%)",
                     pointerEvents: "none",
                     background: "radial-gradient(circle, rgba(255,225,170,0.42) 0%, rgba(255,200,130,0.18) 40%, transparent 75%)",
                     mixBlendMode: "screen",
@@ -327,6 +343,105 @@ export default function HomePage() {
           })()}
         </div>
 
+        {/* Light dev tool — toggle with ?lightDev=true */}
+        {lightDev && bounds.rw > 0 && (() => {
+          const toPct = (clientX: number, clientY: number) => {
+            const el = containerRef.current;
+            if (!el) return null;
+            const rect = el.getBoundingClientRect();
+            const px = ((clientX - rect.left - bounds.ox) / bounds.rw) * 100;
+            const py = ((clientY - rect.top - bounds.oy) / bounds.rh) * 100;
+            return { x: px, y: py };
+          };
+          const wireframe = (cfg: { x: number; y: number; w: number; h: number }, label: string, color: string, centered: boolean) => {
+            const left = bounds.ox + (cfg.x / 100) * bounds.rw - (centered ? (cfg.w / 100) * bounds.rw / 2 : 0);
+            const top = bounds.oy + (cfg.y / 100) * bounds.rh - (centered ? (cfg.h / 100) * bounds.rh / 2 : 0);
+            const width = (cfg.w / 100) * bounds.rw;
+            const height = (cfg.h / 100) * bounds.rh;
+            return (
+              <div key={label} style={{
+                position: "absolute",
+                left, top, width, height,
+                border: `1.5px dashed ${color}`,
+                pointerEvents: "none",
+                zIndex: 99,
+                fontFamily: '"DM Mono", monospace',
+                fontSize: 10,
+                color,
+                textShadow: "1px 1px 0 #000",
+              }}>
+                <span style={{
+                  position: "absolute", top: -16, left: 0,
+                  background: "rgba(0,0,0,0.7)", padding: "2px 5px", borderRadius: 2,
+                  letterSpacing: "0.08em",
+                }}>{label} · {cfg.x},{cfg.y} · {cfg.w}×{cfg.h}</span>
+              </div>
+            );
+          };
+          return (
+            <div
+              style={{
+                position: "absolute", inset: 0, zIndex: 98,
+                cursor: "crosshair",
+              }}
+              onMouseDown={(e) => {
+                const p = toPct(e.clientX, e.clientY);
+                if (!p) return;
+                setDrawing({ x1: p.x, y1: p.y, x2: p.x, y2: p.y });
+              }}
+              onMouseMove={(e) => {
+                if (!drawing) return;
+                const p = toPct(e.clientX, e.clientY);
+                if (!p) return;
+                setDrawing({ ...drawing, x2: p.x, y2: p.y });
+              }}
+              onMouseUp={() => {
+                if (!drawing) return;
+                const x = Math.min(drawing.x1, drawing.x2);
+                const y = Math.min(drawing.y1, drawing.y2);
+                const w = Math.abs(drawing.x2 - drawing.x1);
+                const h = Math.abs(drawing.y2 - drawing.y1);
+                const box = {
+                  x: +x.toFixed(2),
+                  y: +y.toFixed(2),
+                  w: +w.toFixed(2),
+                  h: +h.toFixed(2),
+                };
+                const cx = +(x + w / 2).toFixed(2);
+                const cy = +(y + h / 2).toFixed(2);
+                const out = `{ x: ${box.x}, y: ${box.y}, w: ${box.w}, h: ${box.h} }  // center: ${cx}, ${cy}`;
+                console.log(out);
+                try { navigator.clipboard.writeText(out); } catch {}
+                setLastBox(box);
+                setDrawing(null);
+              }}
+            >
+              {wireframe(LIGHTS.window, "WINDOW", "#00F5FF", false)}
+              {wireframe(LIGHTS.lampPool, "LAMP POOL", "#F72585", true)}
+              {wireframe(LIGHTS.lampBulb, "BULB", "#F7C100", true)}
+
+              {drawing && (() => {
+                const x = Math.min(drawing.x1, drawing.x2);
+                const y = Math.min(drawing.y1, drawing.y2);
+                const w = Math.abs(drawing.x2 - drawing.x1);
+                const h = Math.abs(drawing.y2 - drawing.y1);
+                return (
+                  <div style={{
+                    position: "absolute",
+                    left: bounds.ox + (x / 100) * bounds.rw,
+                    top: bounds.oy + (y / 100) * bounds.rh,
+                    width: (w / 100) * bounds.rw,
+                    height: (h / 100) * bounds.rh,
+                    border: "2px solid #fff",
+                    background: "rgba(255,255,255,0.08)",
+                    pointerEvents: "none",
+                  }} />
+                );
+              })()}
+            </div>
+          );
+        })()}
+
         {/* Vignette */}
         <div style={{
           position: "absolute", inset: 0, pointerEvents: "none", zIndex: 5,
@@ -378,6 +493,35 @@ export default function HomePage() {
             fontFamily: "monospace", fontSize: 11, color: "#00F5FF", pointerEvents: "none",
           }}>
             DEV MODE — click room to log coords
+          </div>
+        )}
+        {lightDev && (
+          <div style={{
+            position: "absolute", top: 16, left: 16, zIndex: 100,
+            background: "rgba(0,0,0,0.85)",
+            border: "1px solid #F72585",
+            borderRadius: 4, padding: "10px 14px",
+            fontFamily: '"DM Mono", monospace', fontSize: 11,
+            color: "#fff", maxWidth: 280, lineHeight: 1.5,
+            pointerEvents: "none",
+          }}>
+            <div style={{ color: "#F72585", letterSpacing: "0.12em", marginBottom: 6 }}>
+              LIGHT DEV
+            </div>
+            <div style={{ opacity: 0.8, fontSize: 10 }}>
+              Drag a box where the light should be.<br />
+              Coords logged + copied to clipboard.
+            </div>
+            {lastBox && (
+              <div style={{
+                marginTop: 8, paddingTop: 8,
+                borderTop: "1px solid rgba(255,255,255,0.15)",
+                color: "#FFE34F", fontSize: 10,
+              }}>
+                last: x:{lastBox.x} y:{lastBox.y} w:{lastBox.w} h:{lastBox.h}<br />
+                center: {(lastBox.x + lastBox.w / 2).toFixed(2)}, {(lastBox.y + lastBox.h / 2).toFixed(2)}
+              </div>
+            )}
           </div>
         )}
         {devMode && devCoords && (
