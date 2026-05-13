@@ -399,28 +399,33 @@ export default function HomePage() {
 
           return (
             <svg
+              width="100%" height="100%"
               style={{
                 position: "absolute", inset: 0, zIndex: 98,
                 cursor: selectedLight ? "crosshair" : "default",
-                pointerEvents: selectedLight ? "auto" : "none",
+                pointerEvents: selectedLight ? "all" : "none",
               }}
               onClick={(e) => {
                 if (!selectedLight) return;
                 const p = toPct(e.clientX, e.clientY);
                 if (!p) return;
-                // Click near first point closes the shape
-                if (draftPoints.length >= 3) {
-                  const first = draftPoints[0];
-                  const dx = p.x - first.x, dy = p.y - first.y;
-                  if (dx * dx + dy * dy < 4) {
-                    closeShape();
-                    return;
+                setDraftPoints((prev) => {
+                  // Click near first point closes the shape
+                  if (prev.length >= 3) {
+                    const first = prev[0];
+                    const dx = p.x - first.x, dy = p.y - first.y;
+                    if (dx * dx + dy * dy < 4) {
+                      setShapes((s) => ({ ...s, [selectedLight]: [...s[selectedLight], prev] }));
+                      return [];
+                    }
                   }
-                }
-                setDraftPoints([...draftPoints, p]);
+                  return [...prev, p];
+                });
               }}
               onDoubleClick={() => closeShape()}
             >
+              {/* Transparent click-catcher — SVG needs a painted element to fire events on empty space */}
+              <rect x={0} y={0} width="100%" height="100%" fill="transparent" />
               {/* Existing shapes for all lights — faded for non-selected */}
               {(["window", "lampPool", "lampBulb"] as LightKey[]).map((key) => {
                 const info = LIGHT_INFO[key];
