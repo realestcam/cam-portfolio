@@ -16,25 +16,28 @@ type Point = { x: number; y: number };
 type LightShapes = Record<LightKey, Point[][]>;
 
 const DEFAULT_SHAPES: LightShapes = {
-  window: [[
-    { x: 41, y: 7 }, { x: 57, y: 7 },
-    { x: 57, y: 34 }, { x: 41, y: 34 },
-  ]],
-  lampPool: [[
-    { x: 12, y: 78 }, { x: 36, y: 76 },
-    { x: 42, y: 92 }, { x: 18, y: 96 },
-  ]],
-  lampBulb: [[
-    { x: 19, y: 79 }, { x: 25, y: 79 },
-    { x: 25, y: 84 }, { x: 19, y: 84 },
-  ]],
+  window: [
+    [{ x: 40.54, y: 27.4 }, { x: 40.4, y: 28.7 }, { x: 41.1, y: 29.66 }],
+    [{ x: 40.99, y: 18.54 }, { x: 41.58, y: 19.27 }, { x: 41.63, y: 17.82 }],
+    [{ x: 48.93, y: 17.16 }, { x: 48.44, y: 17.76 }, { x: 49.01, y: 18.39 }],
+    [{ x: 41.35, y: 13.96 }, { x: 41.02, y: 13.92 }, { x: 41.21, y: 14.84 }],
+    [{ x: 37.76, y: 10.61 }, { x: 38.04, y: 37.31 }, { x: 48.17, y: 29.6 }, { x: 43.14, y: 22.91 }, { x: 44.84, y: 5.94 }],
+  ],
+  lampPool: [
+    [{ x: 26.05, y: 54.34 }, { x: 31.36, y: 71.78 }, { x: 16.13, y: 88.06 }, { x: 2.66, y: 69.93 }, { x: 14.04, y: 36.72 }],
+    [{ x: 13.73, y: 59.69 }, { x: 15.47, y: 58.48 }, { x: 14.34, y: 56.09 }, { x: 13.33, y: 57.2 }],
+  ],
+  lampBulb: [
+    [{ x: 17.55, y: 57.48 }, { x: 13.52, y: 63.13 }, { x: 13.45, y: 53.99 }],
+    [{ x: 51.83, y: 43.53 }, { x: 48.79, y: 44.99 }, { x: 50.27, y: 51.63 }, { x: 52.69, y: 50.52 }],
+  ],
 };
 
 type LightSettings = { feather: number; opacity: number; freq: number };
 const DEFAULT_SETTINGS: Record<LightKey, LightSettings> = {
-  window: { feather: 10, opacity: 30, freq: 1 },
-  lampPool: { feather: 16, opacity: 75, freq: 1 },
-  lampBulb: { feather: 6, opacity: 85, freq: 1 },
+  window: { feather: 29, opacity: 5, freq: 0.4 },
+  lampPool: { feather: 60, opacity: 1, freq: 1.3 },
+  lampBulb: { feather: 25, opacity: 44, freq: 3 },
 };
 
 const LIGHT_INFO: Record<LightKey, { label: string; description: string; color: string }> = {
@@ -428,11 +431,11 @@ export default function HomePage() {
           const toSvgY = (yPct: number) => bounds.oy + (yPct / 100) * bounds.rh;
           const polyStr = (poly: Point[]) => poly.map(p => `${toSvgX(p.x)},${toSvgY(p.y)}`).join(" ");
 
-          const closeShape = () => {
-            if (!selectedLight || draftPoints.length < 3) return;
+          const commitShape = (poly: Point[]) => {
+            if (!selectedLight || poly.length < 3) return;
             setShapes((prev) => ({
               ...prev,
-              [selectedLight]: [...prev[selectedLight], draftPoints],
+              [selectedLight]: [...prev[selectedLight], poly],
             }));
             setDraftPoints([]);
           };
@@ -449,20 +452,18 @@ export default function HomePage() {
                 if (!selectedLight) return;
                 const p = toPct(e.clientX, e.clientY);
                 if (!p) return;
-                setDraftPoints((prev) => {
-                  // Click near first point closes the shape
-                  if (prev.length >= 3) {
-                    const first = prev[0];
-                    const dx = p.x - first.x, dy = p.y - first.y;
-                    if (dx * dx + dy * dy < 4) {
-                      setShapes((s) => ({ ...s, [selectedLight]: [...s[selectedLight], prev] }));
-                      return [];
-                    }
+                // Check close condition against current draft (read, not in updater)
+                if (draftPoints.length >= 3) {
+                  const first = draftPoints[0];
+                  const dx = p.x - first.x, dy = p.y - first.y;
+                  if (dx * dx + dy * dy < 4) {
+                    commitShape(draftPoints);
+                    return;
                   }
-                  return [...prev, p];
-                });
+                }
+                setDraftPoints((prev) => [...prev, p]);
               }}
-              onDoubleClick={() => closeShape()}
+              onDoubleClick={() => commitShape(draftPoints)}
             >
               {/* Transparent click-catcher — SVG needs a painted element to fire events on empty space */}
               <rect x={0} y={0} width="100%" height="100%" fill="transparent" />
