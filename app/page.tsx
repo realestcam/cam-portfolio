@@ -30,6 +30,13 @@ const DEFAULT_SHAPES: LightShapes = {
   ]],
 };
 
+type LightSettings = { feather: number; opacity: number; freq: number };
+const DEFAULT_SETTINGS: Record<LightKey, LightSettings> = {
+  window: { feather: 10, opacity: 30, freq: 1 },
+  lampPool: { feather: 16, opacity: 75, freq: 1 },
+  lampBulb: { feather: 6, opacity: 85, freq: 1 },
+};
+
 const LIGHT_INFO: Record<LightKey, { label: string; description: string; color: string }> = {
   window: {
     label: "Window frame",
@@ -110,6 +117,7 @@ export default function HomePage() {
   const [devCoords, setDevCoords] = useState<{ x: number; y: number } | null>(null);
   const [selectedLight, setSelectedLight] = useState<LightKey | null>("lampPool");
   const [shapes, setShapes] = useState<LightShapes>(DEFAULT_SHAPES);
+  const [settings, setSettings] = useState<Record<LightKey, LightSettings>>(DEFAULT_SETTINGS);
   const [draftPoints, setDraftPoints] = useState<Point[]>([]);
   const [previewMode, setPreviewMode] = useState(false);
   // Always start in "intro" — the pre-hydration script in layout.tsx adds
@@ -190,75 +198,107 @@ export default function HomePage() {
             }}
           />
 
-          {/* Lights — each polygon becomes a clipped gradient blob */}
+          {/* Lights — SVG polygons with feathered Gaussian-blur edges */}
           {bounds.rw > 0 && (() => {
-            const polyToDiv = (poly: Point[], children: React.ReactNode, extra: React.CSSProperties = {}) => {
-              const bb = polyBounds(poly);
-              return (
-                <div
-                  aria-hidden
-                  style={{
-                    position: "absolute",
-                    left: bounds.ox + (bb.x / 100) * bounds.rw,
-                    top: bounds.oy + (bb.y / 100) * bounds.rh,
-                    width: (bb.w / 100) * bounds.rw,
-                    height: (bb.h / 100) * bounds.rh,
-                    clipPath: polyClipPath(poly),
-                    pointerEvents: "none",
-                    overflow: "hidden",
-                    ...extra,
-                  }}
-                >
-                  {children}
-                </div>
-              );
-            };
+            const polyPoints = (poly: Point[]) =>
+              poly.map(p => `${(p.x / 100) * bounds.rw},${(p.y / 100) * bounds.rh}`).join(" ");
             return (
-              <>
-                {/* Window — streetlight + flicker + car pass, all clipped to polygon */}
-                {shapes.window.map((poly, i) => polyToDiv(poly, (
-                  <>
-                    <div style={{
-                      position: "absolute", inset: 0,
-                      background: "radial-gradient(ellipse closest-side at 50% 55%, rgba(255,200,120,0.30), rgba(255,180,90,0.12) 55%, transparent 95%)",
-                      animation: "cityFlicker 7.5s ease-in-out infinite",
-                    }} />
-                    <div style={{
-                      position: "absolute", inset: 0,
-                      background: "radial-gradient(circle closest-side at 35% 40%, rgba(255,230,160,0.45), transparent 70%)",
-                      mixBlendMode: "screen",
-                      animation: "windowFlicker 11s steps(1, end) infinite",
-                    }} />
-                    <div style={{
-                      position: "absolute",
-                      top: "30%", height: "40%", width: "40%", left: "-40%",
-                      background: "radial-gradient(ellipse at 50% 50%, rgba(255,250,220,0.95) 0%, rgba(255,235,170,0.55) 35%, transparent 70%)",
-                      filter: "blur(2px)",
-                      animation: "carPass 14s ease-in-out infinite",
-                    }} />
-                  </>
-                ), { zIndex: 6 + i * 0.01 }))}
+              <svg
+                aria-hidden
+                style={{
+                  position: "absolute",
+                  left: bounds.ox, top: bounds.oy,
+                  width: bounds.rw, height: bounds.rh,
+                  pointerEvents: "none",
+                  zIndex: 6,
+                  overflow: "visible",
+                }}
+              >
+                <defs>
+                  <filter id="cb-feather-window" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur stdDeviation={settings.window.feather} />
+                  </filter>
+                  <filter id="cb-feather-pool" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur stdDeviation={settings.lampPool.feather} />
+                  </filter>
+                  <filter id="cb-feather-bulb" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur stdDeviation={settings.lampBulb.feather} />
+                  </filter>
+                  <radialGradient id="cb-grad-window" cx="0.5" cy="0.55" r="0.7">
+                    <stop offset="0%" stopColor="rgba(255,210,140,1)" />
+                    <stop offset="60%" stopColor="rgba(255,190,110,0.55)" />
+                    <stop offset="100%" stopColor="rgba(255,180,90,0)" />
+                  </radialGradient>
+                  <radialGradient id="cb-grad-pool" cx="0.5" cy="0.5" r="0.6">
+                    <stop offset="0%" stopColor="rgba(255,205,135,1)" />
+                    <stop offset="55%" stopColor="rgba(255,185,105,0.55)" />
+                    <stop offset="100%" stopColor="rgba(255,165,80,0)" />
+                  </radialGradient>
+                  <radialGradient id="cb-grad-bulb" cx="0.5" cy="0.5" r="0.55">
+                    <stop offset="0%" stopColor="rgba(255,240,190,1)" />
+                    <stop offset="55%" stopColor="rgba(255,215,150,0.7)" />
+                    <stop offset="100%" stopColor="rgba(255,200,130,0)" />
+                  </radialGradient>
+                </defs>
 
-                {/* Lamp pool — warm clipped gradient */}
-                {shapes.lampPool.map((poly, i) => polyToDiv(poly, (
-                  <div style={{
-                    position: "absolute", inset: 0,
-                    background: "radial-gradient(ellipse closest-side at 50% 50%, rgba(255,200,130,0.55) 0%, rgba(255,180,100,0.28) 40%, rgba(255,160,80,0.10) 70%, transparent 100%)",
-                    filter: "blur(6px)",
-                    animation: "lampBreathe 6s ease-in-out infinite",
-                  }} />
-                ), { zIndex: 5 + i * 0.01, mixBlendMode: "screen" }))}
+                {/* Window glow — base + flicker bloom */}
+                <g opacity={settings.window.opacity / 100} style={{ mixBlendMode: "screen" }}>
+                  {shapes.window.map((poly, i) => (
+                    <polygon
+                      key={`w-${i}`}
+                      points={polyPoints(poly)}
+                      fill="url(#cb-grad-window)"
+                      filter="url(#cb-feather-window)"
+                      style={{
+                        animation: `cbCityFlicker ${(7.5 / settings.window.freq).toFixed(2)}s ease-in-out infinite`,
+                      }}
+                    />
+                  ))}
+                </g>
+                <g opacity={settings.window.opacity / 100} style={{ mixBlendMode: "screen" }}>
+                  {shapes.window.map((poly, i) => (
+                    <polygon
+                      key={`wf-${i}`}
+                      points={polyPoints(poly)}
+                      fill="url(#cb-grad-window)"
+                      filter="url(#cb-feather-window)"
+                      style={{
+                        animation: `cbWindowFlicker ${(11 / settings.window.freq).toFixed(2)}s steps(1, end) infinite`,
+                      }}
+                    />
+                  ))}
+                </g>
 
-                {/* Lamp bulb — bright hot center */}
-                {shapes.lampBulb.map((poly, i) => polyToDiv(poly, (
-                  <div style={{
-                    position: "absolute", inset: 0,
-                    background: "radial-gradient(circle closest-side at 50% 50%, rgba(255,235,180,0.7) 0%, rgba(255,210,140,0.32) 45%, transparent 90%)",
-                    filter: "blur(2px)",
-                    animation: "lampBreathe 6s ease-in-out infinite",
-                  }} />
-                ), { zIndex: 7 + i * 0.01, mixBlendMode: "screen" }))}
-              </>
+                {/* Lamp pool */}
+                <g opacity={settings.lampPool.opacity / 100} style={{ mixBlendMode: "screen" }}>
+                  {shapes.lampPool.map((poly, i) => (
+                    <polygon
+                      key={`p-${i}`}
+                      points={polyPoints(poly)}
+                      fill="url(#cb-grad-pool)"
+                      filter="url(#cb-feather-pool)"
+                      style={{
+                        animation: `cbLampBreathe ${(6 / settings.lampPool.freq).toFixed(2)}s ease-in-out infinite`,
+                      }}
+                    />
+                  ))}
+                </g>
+
+                {/* Lamp bulb */}
+                <g opacity={settings.lampBulb.opacity / 100} style={{ mixBlendMode: "screen" }}>
+                  {shapes.lampBulb.map((poly, i) => (
+                    <polygon
+                      key={`b-${i}`}
+                      points={polyPoints(poly)}
+                      fill="url(#cb-grad-bulb)"
+                      filter="url(#cb-feather-bulb)"
+                      style={{
+                        animation: `cbLampBreathe ${(6 / settings.lampBulb.freq).toFixed(2)}s ease-in-out infinite`,
+                      }}
+                    />
+                  ))}
+                </g>
+              </svg>
             );
           })()}
 
@@ -619,7 +659,34 @@ export default function HomePage() {
                   <div style={{ fontSize: 10, opacity: 0.55, marginTop: 4, lineHeight: 1.45 }}>
                     {info.description}
                   </div>
-                  <div style={{ display: "flex", gap: 6, marginTop: 8, alignItems: "center" }}>
+
+                  {/* Sliders */}
+                  <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 6 }}>
+                    {([
+                      { key: "feather" as const, label: "Feather", min: 0, max: 60, step: 1, unit: "" },
+                      { key: "opacity" as const, label: "Opacity", min: 0, max: 100, step: 1, unit: "%" },
+                      { key: "freq" as const, label: "Frequency", min: 0.2, max: 3, step: 0.1, unit: "x" },
+                    ]).map(({ key: s, label, min, max, step, unit }) => (
+                      <div key={s} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 9 }}>
+                        <span style={{ width: 58, opacity: 0.65, letterSpacing: "0.08em", textTransform: "uppercase" }}>{label}</span>
+                        <input
+                          type="range"
+                          min={min} max={max} step={step}
+                          value={settings[key][s]}
+                          onChange={(e) => {
+                            const v = parseFloat(e.target.value);
+                            setSettings((prev) => ({ ...prev, [key]: { ...prev[key], [s]: v } }));
+                          }}
+                          style={{ flex: 1, accentColor: info.color, height: 4 }}
+                        />
+                        <span style={{ width: 36, textAlign: "right", color: "#FFE34F", fontFamily: '"DM Mono", monospace' }}>
+                          {settings[key][s]}{unit}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={{ display: "flex", gap: 6, marginTop: 10, alignItems: "center" }}>
                     <span style={{ fontSize: 10, color: "#FFE34F" }}>
                       {count} shape{count === 1 ? "" : "s"}
                     </span>
@@ -670,7 +737,7 @@ export default function HomePage() {
 
             <button
               onClick={() => {
-                const out = `const DEFAULT_SHAPES: LightShapes = ${JSON.stringify(shapes, null, 2)};`;
+                const out = `const DEFAULT_SHAPES: LightShapes = ${JSON.stringify(shapes, null, 2)};\n\nconst DEFAULT_SETTINGS: Record<LightKey, LightSettings> = ${JSON.stringify(settings, null, 2)};`;
                 console.log(out);
                 try { navigator.clipboard.writeText(out); } catch {}
               }}
@@ -683,10 +750,10 @@ export default function HomePage() {
                 letterSpacing: "0.12em", textTransform: "uppercase",
               }}
             >
-              Copy shapes config
+              Copy shapes + settings
             </button>
             <button
-              onClick={() => { setShapes(DEFAULT_SHAPES); setDraftPoints([]); }}
+              onClick={() => { setShapes(DEFAULT_SHAPES); setSettings(DEFAULT_SETTINGS); setDraftPoints([]); }}
               style={{
                 width: "100%", marginTop: 6, padding: "6px 12px",
                 background: "transparent",
@@ -696,7 +763,7 @@ export default function HomePage() {
                 letterSpacing: "0.12em", textTransform: "uppercase",
               }}
             >
-              Reset all shapes
+              Reset all
             </button>
           </div>
         )}

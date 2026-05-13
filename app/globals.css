@@ -100,6 +100,33 @@ body {
   50%      { opacity: 1; }
 }
 
+/* SVG-friendly versions (multiplied against polygon's base opacity attribute via mix-blend) */
+@keyframes cbCityFlicker {
+  0%, 100% { opacity: 0.85; }
+  18%      { opacity: 1; }
+  32%      { opacity: 0.7; }
+  47%      { opacity: 0.95; }
+  61%      { opacity: 0.6; }
+  78%      { opacity: 0.88; }
+}
+
+@keyframes cbWindowFlicker {
+  0%, 100% { opacity: 0; }
+  37%      { opacity: 0; }
+  38%      { opacity: 0.8; }
+  39%      { opacity: 0; }
+  41%      { opacity: 0.55; }
+  42%      { opacity: 0; }
+  72%      { opacity: 0; }
+  73%      { opacity: 0.45; }
+  74%      { opacity: 0; }
+}
+
+@keyframes cbLampBreathe {
+  0%, 100% { opacity: 0.88; }
+  50%      { opacity: 1; }
+}
+
 @keyframes windowFlicker {
   0%, 100% { opacity: 0; }
   37%      { opacity: 0; }
