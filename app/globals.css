@@ -87,16 +87,36 @@ body {
 }
 
 @keyframes carSweep {
-  0%, 88%  { transform: translateX(-220%) skewX(-12deg); opacity: 0; }
-  90%      { transform: translateX(-100%) skewX(-12deg); opacity: 0.55; }
-  94%      { transform: translateX(120%)  skewX(-12deg); opacity: 0.75; }
-  98%      { transform: translateX(360%)  skewX(-12deg); opacity: 0; }
-  100%     { transform: translateX(360%)  skewX(-12deg); opacity: 0; }
+  0%, 82%  { transform: translateX(-160%) skewX(-12deg); opacity: 0; }
+  85%      { transform: translateX(-80%)  skewX(-12deg); opacity: 0.5; }
+  90%      { transform: translateX(40%)   skewX(-12deg); opacity: 0.85; }
+  95%      { transform: translateX(180%)  skewX(-12deg); opacity: 0.55; }
+  100%     { transform: translateX(280%)  skewX(-12deg); opacity: 0; }
+}
+
+@keyframes windowFlicker {
+  0%, 100% { opacity: 0; }
+  37%      { opacity: 0; }
+  38%      { opacity: 0.7; }
+  39%      { opacity: 0; }
+  41%      { opacity: 0.55; }
+  42%      { opacity: 0; }
+  72%      { opacity: 0; }
+  73%      { opacity: 0.45; }
+  74%      { opacity: 0; }
+}
+
+@keyframes sunBeam {
+  0%, 100% { opacity: 0.55; }
+  35%      { opacity: 0.85; }
+  60%      { opacity: 0.7; }
+  80%      { opacity: 0.9; }
 }
 
 .mobile-list { display: none; }
 .mobile-top-bar { display: none; }
 .mobile-spacer { display: none; }
+.mobile-hero-overlay { display: none; }
 
 /* Hide intro overlay if user has already seen it (set pre-hydration by Script in layout) */
 html.cb-skip-intro .cb-opening-overlay { display: none !important; }
@@ -118,6 +138,7 @@ html.cb-skip-intro .cb-opening-overlay { display: none !important; }
   }
   .room-fixed a { display: none !important; }
   .identity-plate { display: none !important; }
+  .mobile-hero-overlay { display: block !important; }
   .mobile-list { display: block; }
   .mobile-top-bar {
     display: flex !important;

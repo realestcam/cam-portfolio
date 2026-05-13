@@ -100,11 +100,11 @@ export const projects: Project[] = [
     brandColor: "#FF6F1F",
     hotspot: { x: 82.87, y: 82.65 },
     heroImage: "/projects/gatorade-let-her-cook/01.mp4",
-    writeup: "A W? No. It was about time to tell the story of the W. Sacrifice, sweat. The women of the WNBA didn't just play the game. They built the W.\n\nWe captured that in its rawest form, and set it to an equally raw track from the queen of Memphis herself. GloRilla. Ad lib included.\n\nWe couldn't help but stank face when we first saw it together. See :37.\n\nIf you know me, you know I love a good ratchet slap, so this was a dream music sync. Glo was already performing at All Star Weekend, which cracked the door open to make one of my favorite things I've made in advertising thus far.",
+    writeup: "Let. Her. Cook. Three words you'd hear on the back of any A'ja Wilson offensive clinic, or any out of this world bomb Caitlin effortlessly splashes. The W is fire, passion, shit talk, dirty plays, tears, beef, and sweat all rolled into one, and that's what it takes to build a league. To lose more, not just get a W, but build the W.\n\nWhen we saw the first cut and heard big GLO come in on the verse? Chills. Let. Her. Cook.",
     credits: "TBWA\\Chiat\\Day LA + OMD",
     carousel: [
       { type: "video", src: "/projects/gatorade-let-her-cook/01.mp4", label: "Let Her Cook: We Made The W", runtime: "60" },
-      { type: "image", src: "/projects/gatorade-let-her-cook/hoodie.jpg", label: "GloRilla x Gatorade Letterman Hoodie", writeup: "What popped up on our newsfeed later that week? Glo, set to perform at halftime during WNBA All Star Weekend. Her track, Let Her Cook, had become the unofficial Gatorade anthem for the W. Her team called us to collaborate on a custom fit for her performance.\n\nWe worked with her stylist to make a custom cropped Letterman x Gatorade towel hoodie, of course, with an iced out zipper. Burrtiful." },
+      { type: "image", src: "/projects/gatorade-let-her-cook/hoodie.jpg", label: "GloRilla x Gatorade Letterman Hoodie", writeup: "Game recognize game, and Glo wanted to double up. She was booked to perform at the All Star Weekend Halftime Show, the track had become the unofficial Gatorade soundtrack of the W, and her team wanted to lean all the way in. We worked with her stylist to make her a 1:1 cropped Letterman x Gatorade towel hoodie, with a bust down G logo pendant and custom patches on the sleeves for each of the G athletes who built the very stage she performed on. YEAH GLO!" },
     ],
     vimeoUrl: null,
   },
@@ -121,7 +121,7 @@ export const projects: Project[] = [
     brandColor: "#2D6BFF",
     hotspot: { x: 11.58, y: 17.17 },
     heroImage: "/projects/acura-your-turn/hero.png",
-    writeup: "After a 20 year hiatus, Acura re released the iconic Integra. People didn't like it, so we had to make some stuff that they would.\n\nWe enlisted a fan favorite in Vince Staples and shot some music video thangs with Dave Meyers. They came out pretty cool.",
+    writeup: "When Acura announced the rerelease of the once iconic Integra, the motor heads… were not feeling it. At all. So we threw them the keys. Acura had already built the car, and just like the first time around, it was the avid culture surrounding it that made it what it was. So do it again. We enlisted a cult favorite renaissance man to take the wheel first: Vince Staples. With Dave Meyers and Mia Barnes behind the lens, a damp release turned into magic.",
     credits: "MullenLowe LA · dir. Dave Meyers · feat. Vince Staples",
     carousel: [
       { type: "video", src: "/projects/acura-your-turn/02.mp4", label: "Magic", runtime: "30", writeup: "When you get Dave Meyers, an iconic car, and Vince Staples, good things happen. Vince was even down to stand on the car." },

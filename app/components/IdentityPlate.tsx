@@ -157,21 +157,6 @@ export function IdentityPlate() {
         >
           shoes off but make urself comfortable.
         </p>
-        <p
-          style={{
-            fontFamily: FONT,
-            fontSize: 9,
-            color: "#FFE34F",
-            opacity: 0.85,
-            letterSpacing: "0.04em",
-            fontStyle: "italic",
-            marginBottom: 10,
-            maxWidth: 380,
-            margin: "0 auto 10px",
-          }}
-        >
-          *pardon the mess, we launched this week and are still tidying things like formatting and spelling.*
-        </p>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14 }}>
           {SOCIALS.map((s, i) => (
             <span key={s.label} style={{ display: "flex", alignItems: "center", gap: 14 }}>
