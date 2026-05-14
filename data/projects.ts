@@ -48,7 +48,7 @@ export const projects: Project[] = [
     hotspot: { x: 72.18, y: 9.43 },
     heroImage: "/projects/gatorade-it-hasnt-changed/hero.webp",
     writeup: "In 2024, we reintroduced the iconic colored sweat of Gatorade's past. Combined with one of the most popular hip hop songs of the year from Playboi Carti and Travis Scott, it made for a killer campaign.\n\nEverything about the game has changed, except for the most important thing: what you have inside.\n\nNgl, that line, shout to Mark Peters, is all time.",
-    credits: "TBWA\\Chiat\\Day LA · Silver Clio Sports 2024 (Caitlin Clark)",
+    credits: "TBWA\\Chiat\\Day LA",
     carousel: [
       { type: "video", src: "/projects/gatorade-it-hasnt-changed/01.mp4", label: "Anthem", runtime: "60" },
       { type: "video", src: "/projects/gatorade-it-hasnt-changed/02.mp4", label: "Caitlin Clark", runtime: "60", writeup: "It was Caitlin's first year in the league, and she was already something special. We put the camera down at half court and let her go, and it felt like magic. Took home a Silver Clio for it too." },
@@ -101,7 +101,7 @@ export const projects: Project[] = [
     hotspot: { x: 82.87, y: 82.65 },
     heroImage: "/projects/gatorade-let-her-cook/01.mp4",
     writeup: "Let. Her. Cook. Three words you'd hear on the back of any A'ja Wilson offensive clinic, or any out of this world bomb Caitlin effortlessly splashes. The W is fire, passion, shit talk, dirty plays, tears, beef, and sweat all rolled into one, and that's what it takes to build a league. To lose more, not just get a W, but build the W.\n\nWhen we saw the first cut and heard big GLO come in on the verse? Chills. Let. Her. Cook.",
-    credits: "TBWA\\Chiat\\Day LA + OMD",
+    credits: "TBWA\\Chiat\\Day LA",
     carousel: [
       { type: "video", src: "/projects/gatorade-let-her-cook/01.mp4", label: "Let Her Cook: We Made The W", runtime: "60" },
       { type: "image", src: "/projects/gatorade-let-her-cook/hoodie.jpg", label: "GloRilla x Gatorade Letterman Hoodie", writeup: "Game recognize game, and Glo wanted to double up. She was booked to perform at the All Star Weekend Halftime Show, the track had become the unofficial Gatorade soundtrack of the W, and her team wanted to lean all the way in. We worked with her stylist to make her a 1:1 cropped Letterman x Gatorade towel hoodie, with a bust down G logo pendant and custom patches on the sleeves for each of the G athletes who built the very stage she performed on. YEAH GLO!" },
@@ -122,7 +122,7 @@ export const projects: Project[] = [
     hotspot: { x: 11.58, y: 17.17 },
     heroImage: "/projects/acura-your-turn/hero.png",
     writeup: "When Acura announced the rerelease of the once iconic Integra, the motor heads… were not feeling it. At all. So we threw them the keys. Acura had already built the car, and just like the first time around, it was the avid culture surrounding it that made it what it was. So do it again. We enlisted a cult favorite renaissance man to take the wheel first: Vince Staples. With Dave Meyers and Mia Barnes behind the lens, a damp release turned into magic.",
-    credits: "MullenLowe LA · dir. Dave Meyers · feat. Vince Staples",
+    credits: "MullenLowe LA",
     carousel: [
       { type: "video", src: "/projects/acura-your-turn/02.mp4", label: "Magic", runtime: "30", writeup: "When you get Dave Meyers, an iconic car, and Vince Staples, good things happen. Vince was even down to stand on the car." },
       { type: "video", src: "/projects/acura-your-turn/01.mp4", label: "Slide", runtime: "30" },
@@ -144,7 +144,7 @@ export const projects: Project[] = [
     hotspot: { x: 15.45, y: 50.09 },
     heroImage: "/projects/acura-decentraland/01.mp4",
     writeup: "It's like we've come full circle here in 2026.\n\nWhen we made the first car dealership in the Metaverse, there were a LOT of meta experiments that followed.\n\nLuckily, we timed this one out perfectly. After partnering with 3D artist Wannerstedt, who custom made NFTs for Integra presalers, the NFTs sold out completely.",
-    credits: "MullenLowe LA · w/ Wannerstedt",
+    credits: "MullenLowe LA",
     carousel: [
       { type: "video", src: "/projects/acura-decentraland/01.mp4", label: "Case Study" },
       { type: "image", src: "/projects/acura-decentraland/02.jpeg", label: "User Screenshots" },
@@ -166,7 +166,7 @@ export const projects: Project[] = [
     hotspot: { x: 33.47, y: 17.35 },
     heroImage: "/projects/grey-goose-voila/hero.jpg",
     writeup: "Only magic could make a premium French vodka create something born of convenience. And so magic did.\n\nGrey Goose launched their premade martini in a bottle, and with Autumn de Wilde as our director partner, **Voilà**.",
-    credits: "MullenLowe LA · dir. Autumn de Wilde",
+    credits: "MullenLowe LA",
     carousel: [
       { type: "video", src: "/projects/grey-goose-voila/01.mp4", label: "Now You See It", runtime: "30" },
       { type: "video", src: "/projects/grey-goose-voila/02.mp4", label: "Seed", runtime: "15" },
@@ -209,7 +209,7 @@ export const projects: Project[] = [
     hotspot: { x: 44.16, y: 45.86 },
     heroImage: "/projects/all-for-kicks/hero.jpg",
     writeup: "**eBay** launched their new sneakers handle on social, so we went deep on what it's like to be obsessed with sneakers.\n\nThey say every shoe tells a story. A sneakerhead's are crazier.",
-    credits: "The Many · dir. Ariel Fisher (Tuff Contender) · Webby Honoree 2022",
+    credits: "The Many",
     carousel: [
       { type: "video", src: "/projects/all-for-kicks/01.mp4", label: "Sniff", runtime: "15" },
       { type: "video", src: "/projects/all-for-kicks/02.mp4", label: "Taste", runtime: "15" },
@@ -235,7 +235,7 @@ export const projects: Project[] = [
     hotspot: { x: 44.85, y: 57.13 },
     heroImage: "/projects/noah-album-launch/hero.webp",
     writeup: "You've probably seen Noah by now. He's a big deal these days, alongside his singing cheetah puppet that cooks food with Food Network chefs.\n\nBefore the Hollywood lights, **Noah** had a solo career and launched an album called Fuzzy. I had the honor of creative directing the rollout alongside my friend and maestro Lingie Park.\n\nThis one is dear to me. We had no money to make it, and it's still some of the work I'm most proud of.",
-    credits: "w/ Lingie Park · Budget: $0",
+    credits: "",
     carousel: [
       { type: "image", src: "/projects/noah-album-launch/08.gif", label: "Is This Love" },
       { type: "image", src: "/projects/noah-album-launch/03.gif", label: "Is This Love 8 Bit" },
@@ -276,7 +276,7 @@ export const projects: Project[] = [
     hotspot: { x: 58.91, y: 74.91 },
     heroImage: "/projects/diet-coke-because-i-can/hero.webp",
     writeup: "Diet Coke had a glossy, mom coded past, and they wanted out. We rewrote it for everyone else, telling the stories of relatable people in not so relatable situations, with Diet Coke as their handy sidekick along the way.\n\nmade with vive.",
-    credits: "made with vive",
+    credits: "",
     carousel: [
       { type: "video", src: "/projects/diet-coke-because-i-can/01.mp4", label: "Big Meeting" },
       { type: "video", src: "/projects/diet-coke-because-i-can/02.mp4", label: "Sophomore Hustle" },
@@ -339,7 +339,7 @@ export const projects: Project[] = [
     hotspot: { x: 38.81, y: 78.07 },
     heroImage: "/Clean.webp",
     writeup: "The GOAT said it best — EVERYTHING ABOUT THE GAME HAS CHANGED. And shiiieeedddddddddd, has it.\n\nI built this site with a mix of AI tools — modeling and object renders, coding, storage, debugging, and more. And it was fun af. Seeing the pieces come together one by one, then bringing individual elements into Photoshop to add the weird Cam details exactly how I had them in my head — that was a blast.\n\nThis space will keep evolving. It'll always be a home for my work, and you'll always have the grid option, but it will also keep being a place for me to experiment, make things, break things, and hopefully not get kicked off the internet.\n\nCome through once in a while.\n\nRecently, I've worked with brands, teams, athletes, creators, and more on everything from generative video, stills, and product photography to productivity systems and consulting on where AI actually belongs in the creative process — so if you're trying to make something better, more insane, faster, or actually useful, you know where to find me.",
-    credits: "self-initiated",
+    credits: "",
     carousel: [
       { type: "video", src: "/projects/ai-creations/01.mp4" },
       { type: "video", src: "/projects/ai-creations/03.mp4" },
