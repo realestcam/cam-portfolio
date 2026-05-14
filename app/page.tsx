@@ -8,7 +8,6 @@ import { ProjectLabel } from "./components/ProjectLabel";
 import { IdentityPlate } from "./components/IdentityPlate";
 import { OpeningExperience, CenterNotification } from "./components/OpeningExperience";
 import { LazyVideo } from "./components/LazyVideo";
-import { GalaxySwirl, MatrixCode, PeaceSignBurst } from "./components/RoomEffects";
 
 type IntroPhase = "intro" | "notification" | "sync" | "normal";
 
@@ -209,15 +208,6 @@ export default function HomePage() {
               objectFit: "contain", display: "block",
             }}
           />
-
-          {/* Room effects — galaxy + matrix + peace sign hover */}
-          {bounds.rw > 0 && (
-            <>
-              <GalaxySwirl bounds={bounds} x={87} y={20} size={9} opacity={0.6} />
-              <MatrixCode bounds={bounds} x={36} y={50} width={10} height={7} opacity={0.55} />
-              <PeaceSignBurst bounds={bounds} x={55} y={51} visible={hovered === "about-me"} />
-            </>
-          )}
 
           {/* Lights — SVG polygons with feathered Gaussian-blur edges */}
           {bounds.rw > 0 && (() => {
