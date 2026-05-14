@@ -7,6 +7,7 @@ import { projects } from "@/data/projects";
 import { ProjectLabel } from "./components/ProjectLabel";
 import { IdentityPlate } from "./components/IdentityPlate";
 import { OpeningExperience, CenterNotification } from "./components/OpeningExperience";
+import { LazyVideo } from "./components/LazyVideo";
 
 type IntroPhase = "intro" | "notification" | "sync" | "normal";
 
@@ -834,9 +835,8 @@ export default function HomePage() {
                   position: "relative",
                 }}>
                   {isVideo ? (
-                    <video
+                    <LazyVideo
                       src={p.heroImage}
-                      muted playsInline loop autoPlay
                       style={{ width: "100%", height: "100%", objectFit: "cover" }}
                     />
                   ) : (

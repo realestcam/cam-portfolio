@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { projects, type Project } from "@/data/projects";
+import { LazyVideo } from "../components/LazyVideo";
 
 const FONT = '"DM Mono", "Courier New", monospace';
 const DARK = "#1b120b";
@@ -85,9 +86,8 @@ function ProjectCard({ project }: { project: Project }) {
         onMouseOut={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.06)"; }}
       >
         {project.heroImage && heroIsVideo && (
-          <video
+          <LazyVideo
             src={project.heroImage}
-            autoPlay muted loop playsInline preload="metadata"
             style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
           />
         )}

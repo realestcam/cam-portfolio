@@ -268,7 +268,7 @@ export const projects: Project[] = [
     credits: "",
     carousel: [
       { type: "image", src: "/projects/vince-staples-coachella/01.jpeg", label: "Dark" },
-      { type: "image", src: "/projects/vince-staples-coachella/02.png", label: "Low Angle" },
+      { type: "image", src: "/projects/vince-staples-coachella/02.jpg", label: "Low Angle" },
       { type: "image", src: "/projects/vince-staples-coachella/03.jpg", label: "Side" },
     ],
     vimeoUrl: null,
