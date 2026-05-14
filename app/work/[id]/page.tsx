@@ -2,7 +2,7 @@
 
 import { useState, use } from "react";
 import Link from "next/link";
-import { getProject, type Project } from "@/data/projects";
+import { getProject, projects, type Project } from "@/data/projects";
 import { ProjectLabel } from "../../components/ProjectLabel";
 
 const isVideoSrc = (src: string) => /\.(mp4|webm|mov)(\?|$)/i.test(src);
@@ -80,12 +80,22 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
   const writeupParagraphs = project.writeup.split(/\n\n+/).filter(Boolean);
   const accent = project.brandColor || "#FFE34F";
 
+  // Prev / Next navigation across active projects (wraps around)
+  const activeProjects = projects.filter((p) => p.active);
+  const currentIdx = activeProjects.findIndex((p) => p.id === project.id);
+  const prevProject = currentIdx >= 0
+    ? activeProjects[(currentIdx - 1 + activeProjects.length) % activeProjects.length]
+    : null;
+  const nextProject = currentIdx >= 0
+    ? activeProjects[(currentIdx + 1) % activeProjects.length]
+    : null;
+
   return (
     <div style={{ minHeight: "100vh", background: "#0a0908" }}>
       {/* Header */}
       <header className="project-page-header" style={{
         position: "sticky", top: 0, zIndex: 50,
-        display: "flex", alignItems: "center", padding: "20px 48px",
+        display: "flex", alignItems: "center", gap: 18, padding: "20px 48px",
         background: "rgba(10,9,8,0.93)", backdropFilter: "blur(14px)",
         borderBottom: "1px solid rgba(255,255,255,0.07)",
       }}>
@@ -94,6 +104,15 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
           onMouseOut={(e)  => (e.currentTarget.style.color = "rgba(255,255,255,0.38)")}
         >
           ← Back to Room
+        </Link>
+        <span style={{
+          color: "rgba(255,255,255,0.18)", fontFamily: '"DM Mono", monospace', fontSize: 11,
+        }}>|</span>
+        <Link href="/work" style={backStyle}
+          onMouseOver={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.85)")}
+          onMouseOut={(e)  => (e.currentTarget.style.color = "rgba(255,255,255,0.38)")}
+        >
+          ← Back to Grid
         </Link>
       </header>
 
@@ -382,13 +401,138 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
           </div>
         )}
 
-        {/* Back link */}
-        <Link href="/" style={backStyle}
-          onMouseOver={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.8)")}
-          onMouseOut={(e)  => (e.currentTarget.style.color = "rgba(255,255,255,0.38)")}
-        >
-          ← Back to Room
-        </Link>
+        {/* Prev / Next project nav — bright, obvious, with titles */}
+        {(prevProject || nextProject) && (
+          <nav className="project-nav" aria-label="Project navigation">
+            {prevProject && (
+              <Link
+                href={`/work/${prevProject.id}`}
+                style={{
+                  display: "block", textDecoration: "none",
+                  padding: "18px 22px",
+                  background: "rgba(247,37,133,0.08)",
+                  border: "1px solid rgba(247,37,133,0.35)",
+                  borderRadius: 4,
+                  transition: "all 0.2s ease",
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.background = "rgba(247,37,133,0.18)";
+                  e.currentTarget.style.borderColor = "#F72585";
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.background = "rgba(247,37,133,0.08)";
+                  e.currentTarget.style.borderColor = "rgba(247,37,133,0.35)";
+                }}
+              >
+                <div style={{
+                  fontFamily: '"DM Mono", monospace',
+                  fontSize: 11, fontWeight: 500,
+                  letterSpacing: "0.22em",
+                  textTransform: "uppercase",
+                  color: "#F72585",
+                  marginBottom: 8,
+                }}>
+                  ← Previous Project
+                </div>
+                <div style={{
+                  fontFamily: '"DM Mono", monospace',
+                  fontSize: 14, fontWeight: 500,
+                  letterSpacing: "0.04em",
+                  textTransform: "uppercase",
+                  color: prevProject.brandColor || "rgba(255,255,255,0.85)",
+                  textShadow: "1px 1px 0 #1b120b",
+                }}>
+                  {prevProject.client || prevProject.title}
+                </div>
+                {prevProject.campaign && (
+                  <div style={{
+                    fontFamily: '"DM Mono", monospace',
+                    fontSize: 12, fontWeight: 400,
+                    color: "rgba(243,234,214,0.68)",
+                    textShadow: "1px 1px 0 #1b120b",
+                    marginTop: 2,
+                  }}>
+                    {prevProject.title}
+                  </div>
+                )}
+              </Link>
+            )}
+            {nextProject && (
+              <Link
+                href={`/work/${nextProject.id}`}
+                style={{
+                  display: "block", textDecoration: "none",
+                  padding: "18px 22px",
+                  background: "rgba(247,37,133,0.08)",
+                  border: "1px solid rgba(247,37,133,0.35)",
+                  borderRadius: 4,
+                  textAlign: "right",
+                  transition: "all 0.2s ease",
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.background = "rgba(247,37,133,0.18)";
+                  e.currentTarget.style.borderColor = "#F72585";
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.background = "rgba(247,37,133,0.08)";
+                  e.currentTarget.style.borderColor = "rgba(247,37,133,0.35)";
+                }}
+              >
+                <div style={{
+                  fontFamily: '"DM Mono", monospace',
+                  fontSize: 11, fontWeight: 500,
+                  letterSpacing: "0.22em",
+                  textTransform: "uppercase",
+                  color: "#F72585",
+                  marginBottom: 8,
+                }}>
+                  Next Project →
+                </div>
+                <div style={{
+                  fontFamily: '"DM Mono", monospace',
+                  fontSize: 14, fontWeight: 500,
+                  letterSpacing: "0.04em",
+                  textTransform: "uppercase",
+                  color: nextProject.brandColor || "rgba(255,255,255,0.85)",
+                  textShadow: "1px 1px 0 #1b120b",
+                }}>
+                  {nextProject.client || nextProject.title}
+                </div>
+                {nextProject.campaign && (
+                  <div style={{
+                    fontFamily: '"DM Mono", monospace',
+                    fontSize: 12, fontWeight: 400,
+                    color: "rgba(243,234,214,0.68)",
+                    textShadow: "1px 1px 0 #1b120b",
+                    marginTop: 2,
+                  }}>
+                    {nextProject.title}
+                  </div>
+                )}
+              </Link>
+            )}
+          </nav>
+        )}
+
+        {/* Small back-out links under the nav */}
+        <div style={{
+          display: "flex", gap: 14, marginTop: 24,
+          alignItems: "center", justifyContent: "center",
+        }}>
+          <Link href="/" style={backStyle}
+            onMouseOver={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.8)")}
+            onMouseOut={(e)  => (e.currentTarget.style.color = "rgba(255,255,255,0.38)")}
+          >
+            ← Back to Room
+          </Link>
+          <span style={{ color: "rgba(255,255,255,0.18)", fontFamily: '"DM Mono", monospace', fontSize: 11 }}>|</span>
+          <Link href="/work" style={backStyle}
+            onMouseOver={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.8)")}
+            onMouseOut={(e)  => (e.currentTarget.style.color = "rgba(255,255,255,0.38)")}
+          >
+            ← Back to Grid
+          </Link>
+        </div>
 
         {/* Credits — last line */}
         {project.credits && (

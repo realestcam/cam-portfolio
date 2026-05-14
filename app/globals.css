@@ -144,6 +144,32 @@ body {
 .mobile-spacer { display: none; }
 .mobile-hero-overlay { display: none; }
 
+/* 3-column grid for the work page */
+.grid-projects {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 56px 32px;
+}
+@media (max-width: 900px) {
+  .grid-projects { grid-template-columns: repeat(2, 1fr); gap: 40px 24px; }
+}
+@media (max-width: 600px) {
+  .grid-projects { grid-template-columns: 1fr; gap: 36px; }
+}
+
+/* Prev/Next project nav at the bottom of project pages */
+.project-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 60px;
+  padding-top: 32px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+@media (max-width: 600px) {
+  .project-nav { grid-template-columns: 1fr; }
+}
+
 /* Hide intro overlay if user has already seen it (set pre-hydration by Script in layout) */
 html.cb-skip-intro .cb-opening-overlay { display: none !important; }
 

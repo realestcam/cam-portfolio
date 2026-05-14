@@ -69,7 +69,6 @@ function ProjectCard({ project }: { project: Project }) {
       style={{
         display: "block",
         textDecoration: "none",
-        marginBottom: 56,
       }}
     >
       <div
@@ -107,7 +106,7 @@ function ProjectCard({ project }: { project: Project }) {
         lineHeight: 1.3,
       }}>
         <div style={{
-          fontSize: 14,
+          fontSize: 13,
           fontWeight: 600,
           textTransform: "uppercase",
           letterSpacing: "0.06em",
@@ -118,7 +117,7 @@ function ProjectCard({ project }: { project: Project }) {
         </div>
         {project.campaign && (
           <div style={{
-            fontSize: 13,
+            fontSize: 12,
             color: OFF_WHITE,
             textShadow: SHADOW,
             marginTop: 3,
@@ -204,7 +203,7 @@ export default function GridViewPage() {
 
         {/* Cards (Brand Work / Freelance) */}
         {tab !== "about" && (
-          <div>
+          <div className="grid-projects">
             {showing.map((p) => (
               <ProjectCard key={p.id} project={p} />
             ))}
