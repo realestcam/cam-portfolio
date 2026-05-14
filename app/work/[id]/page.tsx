@@ -409,10 +409,10 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
                 href={`/work/${prevProject.id}`}
                 style={{
                   display: "block", textDecoration: "none",
-                  padding: "18px 22px",
-                  background: "rgba(247,37,133,0.08)",
-                  border: "1px solid rgba(247,37,133,0.35)",
-                  borderRadius: 4,
+                  padding: "10px 14px",
+                  background: "rgba(247,37,133,0.06)",
+                  border: "1px solid rgba(247,37,133,0.3)",
+                  borderRadius: 3,
                   transition: "all 0.2s ease",
                 }}
                 onMouseOver={(e) => {
@@ -426,17 +426,17 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
               >
                 <div style={{
                   fontFamily: '"DM Mono", monospace',
-                  fontSize: 11, fontWeight: 500,
-                  letterSpacing: "0.22em",
+                  fontSize: 9, fontWeight: 500,
+                  letterSpacing: "0.18em",
                   textTransform: "uppercase",
                   color: "#F72585",
-                  marginBottom: 8,
+                  marginBottom: 4,
                 }}>
                   ← Previous Project
                 </div>
                 <div style={{
                   fontFamily: '"DM Mono", monospace',
-                  fontSize: 14, fontWeight: 500,
+                  fontSize: 11, fontWeight: 500,
                   letterSpacing: "0.04em",
                   textTransform: "uppercase",
                   color: prevProject.brandColor || "rgba(255,255,255,0.85)",
@@ -447,10 +447,10 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
                 {prevProject.campaign && (
                   <div style={{
                     fontFamily: '"DM Mono", monospace',
-                    fontSize: 12, fontWeight: 400,
-                    color: "rgba(243,234,214,0.68)",
+                    fontSize: 10, fontWeight: 400,
+                    color: "rgba(243,234,214,0.6)",
                     textShadow: "1px 1px 0 #1b120b",
-                    marginTop: 2,
+                    marginTop: 1,
                   }}>
                     {prevProject.title}
                   </div>
@@ -462,10 +462,10 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
                 href={`/work/${nextProject.id}`}
                 style={{
                   display: "block", textDecoration: "none",
-                  padding: "18px 22px",
-                  background: "rgba(247,37,133,0.08)",
-                  border: "1px solid rgba(247,37,133,0.35)",
-                  borderRadius: 4,
+                  padding: "10px 14px",
+                  background: "rgba(247,37,133,0.06)",
+                  border: "1px solid rgba(247,37,133,0.3)",
+                  borderRadius: 3,
                   textAlign: "right",
                   transition: "all 0.2s ease",
                 }}
@@ -480,17 +480,17 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
               >
                 <div style={{
                   fontFamily: '"DM Mono", monospace',
-                  fontSize: 11, fontWeight: 500,
-                  letterSpacing: "0.22em",
+                  fontSize: 9, fontWeight: 500,
+                  letterSpacing: "0.18em",
                   textTransform: "uppercase",
                   color: "#F72585",
-                  marginBottom: 8,
+                  marginBottom: 4,
                 }}>
                   Next Project →
                 </div>
                 <div style={{
                   fontFamily: '"DM Mono", monospace',
-                  fontSize: 14, fontWeight: 500,
+                  fontSize: 11, fontWeight: 500,
                   letterSpacing: "0.04em",
                   textTransform: "uppercase",
                   color: nextProject.brandColor || "rgba(255,255,255,0.85)",
@@ -501,10 +501,10 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
                 {nextProject.campaign && (
                   <div style={{
                     fontFamily: '"DM Mono", monospace',
-                    fontSize: 12, fontWeight: 400,
-                    color: "rgba(243,234,214,0.68)",
+                    fontSize: 10, fontWeight: 400,
+                    color: "rgba(243,234,214,0.6)",
                     textShadow: "1px 1px 0 #1b120b",
-                    marginTop: 2,
+                    marginTop: 1,
                   }}>
                     {nextProject.title}
                   </div>
