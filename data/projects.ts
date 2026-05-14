@@ -235,7 +235,7 @@ export const projects: Project[] = [
     hotspot: { x: 44.85, y: 57.13 },
     heroImage: "/projects/noah-album-launch/hero.webp",
     writeup: "You've probably seen Noah by now. He's a big deal these days, alongside his singing cheetah puppet that cooks food with Food Network chefs.\n\nBefore the Hollywood lights, **Noah** had a solo career and launched an album called Fuzzy. I had the honor of creative directing the rollout alongside my friend and maestro Lingie Park.\n\nThis one is dear to me. We had no money to make it, and it's still some of the work I'm most proud of.",
-    credits: "",
+    credits: "Move78",
     carousel: [
       { type: "image", src: "/projects/noah-album-launch/08.gif", label: "Is This Love" },
       { type: "image", src: "/projects/noah-album-launch/03.gif", label: "Is This Love 8 Bit" },
@@ -276,7 +276,7 @@ export const projects: Project[] = [
     hotspot: { x: 58.91, y: 74.91 },
     heroImage: "/projects/diet-coke-because-i-can/hero.webp",
     writeup: "Diet Coke had a glossy, mom coded past, and they wanted out. We rewrote it for everyone else, telling the stories of relatable people in not so relatable situations, with Diet Coke as their handy sidekick along the way.\n\nmade with vive.",
-    credits: "",
+    credits: "Anomaly",
     carousel: [
       { type: "video", src: "/projects/diet-coke-because-i-can/01.mp4", label: "Big Meeting" },
       { type: "video", src: "/projects/diet-coke-because-i-can/02.mp4", label: "Sophomore Hustle" },
