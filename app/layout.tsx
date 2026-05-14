@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { MobileTopBar } from "./components/MobileTopBar";
 
@@ -40,6 +41,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <MobileTopBar />
         <div className="mobile-spacer" aria-hidden />
         {children}
+        <Analytics />
       </body>
     </html>
   );
