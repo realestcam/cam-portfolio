@@ -51,7 +51,7 @@ export const projects: Project[] = [
     credits: "TBWA\\Chiat\\Day LA · Silver Clio Sports 2024 (Caitlin Clark)",
     carousel: [
       { type: "video", src: "/projects/gatorade-it-hasnt-changed/01.mp4", label: "Anthem", runtime: "60" },
-      { type: "video", src: "/projects/gatorade-it-hasnt-changed/02.mp4", label: "Caitlin Clark", runtime: "60", writeup: "It was Caitlin Clark's first year in the league, and she was already something special. We put the camera down at half court and let her go. It felt like magic." },
+      { type: "video", src: "/projects/gatorade-it-hasnt-changed/02.mp4", label: "Caitlin Clark", runtime: "60", writeup: "It was Caitlin's first year in the league, and she was already something special. We put the camera down at half court and let her go, and it felt like magic. Took home a Silver Clio for it too." },
       { type: "video", src: "/projects/gatorade-it-hasnt-changed/03.mp4", label: "Jayson Tatum", runtime: "30" },
       { type: "video", src: "/projects/gatorade-it-hasnt-changed/04.mp4", label: "Sydney McLaughlin", runtime: "30" },
       { type: "video", src: "/projects/gatorade-it-hasnt-changed/05.mp4", label: "Hello Coach: Josh Allen", runtime: "30", writeup: "Josh Allen got rejected by God knows how many schools. He kept going. Now look at him." },
@@ -72,7 +72,7 @@ export const projects: Project[] = [
     brandColor: "#FF6F1F",
     hotspot: { x: 74.46, y: 43.22 },
     heroImage: "/projects/gatorade-lose-more-win-more/hero.jpg",
-    writeup: "Lose more sweat. Win more anything.\n\nAll the stars aligned. Mr. Morale himself big stepped into the end zone after a generational squabble in the hip hop world.\n\nBut the point wasn't just Kung Fu Kenny. It was the same thing that connects every great athlete, artist, and moment: dedication, discipline, and sweat will always prevail.\n\nInsane production. Killer team. Perfect storm.",
+    writeup: "Lose more sweat. Win more...everything.\n\nAll the stars aligned on this one. Mr. Morale himself big stepped into the end zone after a generational squabble in the hip hop world, and fresh off the beef, the Kenny stans ate it up and dissected it frame by frame, like they tend to do.\n\nBut the point wasn't just Kung Fu Kenny. It was the same thing that connects every great athlete, artist, and moment: dedication, discipline, and sweat will always prevail.",
     credits: "TBWA\\Chiat\\Day LA",
     carousel: [
       { type: "video", src: "/projects/gatorade-lose-more-win-more/01.mp4", label: "Anthem", runtime: "60" },
@@ -187,8 +187,8 @@ export const projects: Project[] = [
     brandColor: "#D62E1F",
     hotspot: { x: 52.77, y: 69.98 },
     heroImage: "/projects/panda-express-multiple/01.mp4",
-    writeup: "",
-    credits: "TBD",
+    writeup: "We made a bunch of films for panda over my time on the brand. The first one celebrated Lunar New Year, written to invite outsiders into the holiday while still honoring it for the people who already grew up with it. Later we followed a Wok Master through the actual process behind the food, because people tend to assume fast casual means microwaved and sad, and that just isn't true.",
+    credits: "TBWA\\Chiat\\Day LA",
     carousel: [
       { type: "video", src: "/projects/panda-express-multiple/01.mp4", label: "Traditions Shared" },
       { type: "video", src: "/projects/panda-express-multiple/02.mp4", label: "Crispy Almond Chicken Breast" },
@@ -234,8 +234,8 @@ export const projects: Project[] = [
     brandColor: "#F72585",
     hotspot: { x: 44.85, y: 57.13 },
     heroImage: "/projects/noah-album-launch/hero.webp",
-    writeup: "You've probably seen Noah by now. He's a big deal these days, alongside his singing cheetah puppet that cooks food with Food Network chefs.\n\nBefore the Hollywood lights, **Noah** had a solo career and launched an album called Fuzzy. I had the honor of creative directing the rollout alongside my friend and maestro Lindy Park.\n\nThis one is dear to me. We had no money to make it, and it's still some of the work I'm most proud of.",
-    credits: "w/ Lindy Park · Budget: $0",
+    writeup: "You've probably seen Noah by now. He's a big deal these days, alongside his singing cheetah puppet that cooks food with Food Network chefs.\n\nBefore the Hollywood lights, **Noah** had a solo career and launched an album called Fuzzy. I had the honor of creative directing the rollout alongside my friend and maestro Lingie Park.\n\nThis one is dear to me. We had no money to make it, and it's still some of the work I'm most proud of.",
+    credits: "w/ Lingie Park · Budget: $0",
     carousel: [
       { type: "image", src: "/projects/noah-album-launch/08.gif", label: "Is This Love" },
       { type: "image", src: "/projects/noah-album-launch/03.gif", label: "Is This Love 8 Bit" },
@@ -275,7 +275,7 @@ export const projects: Project[] = [
     brandColor: "#C8102E",
     hotspot: { x: 58.91, y: 74.91 },
     heroImage: "/projects/diet-coke-because-i-can/hero.webp",
-    writeup: "",
+    writeup: "Diet Coke had a glossy, mom coded past, and they wanted out. We rewrote it for everyone else, telling the stories of relatable people in not so relatable situations, with Diet Coke as their handy sidekick along the way.\n\nmade with vive.",
     credits: "made with vive",
     carousel: [
       { type: "video", src: "/projects/diet-coke-because-i-can/01.mp4", label: "Big Meeting" },
